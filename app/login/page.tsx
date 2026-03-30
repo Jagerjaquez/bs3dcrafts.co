@@ -4,19 +4,22 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
+import { Navbar } from '@/components/navbar'
+import { Footer } from '@/components/footer'
+import { LogIn, Mail, Lock, ArrowRight, Sparkles, User, Shield, Menu, X } from 'lucide-react'
 
 function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
   
   const { user, login } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/account'
 
-  // Redirect if already logged in
   useEffect(() => {
     if (user) {
       router.push(redirect)
@@ -38,104 +41,200 @@ function LoginForm() {
     }
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Hesabınıza Giriş Yapın
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Veya{' '}
-            <Link href="/register" className="font-medium text-black hover:underline">
-              yeni hesap oluşturun
-            </Link>
-          </p>
-        </div>
+  const loginOptions = [
+    {
+      icon: User,
+      title: 'Kullanıcı Girişi',
+      description: 'Email ve şifrenizle giriş yapın',
+      action: () => setShowMenu(false),
+      color: 'from-primary to-secondary'
+    },
+    {
+      icon: Shield,
+      title: 'Admin Girişi',
+      description: 'Yönetici paneline erişim',
+      action: () => router.push('/admin/login'),
+      color: 'from-secondary to-accent'
+    }
+  ]
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="flex">
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">{error}</h3>
-                </div>
+  return (
+    <div className="min-h-screen flex flex-col relative">
+      {/* Animated background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+      </div>
+
+      <Navbar />
+      
+      <main className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-md w-full space-y-8 animate-fade-in-up">
+          {/* Header */}
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 mb-6 animate-bounce-slow">
+              <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+              <span className="text-sm font-medium text-white">Hoş Geldiniz</span>
+            </div>
+            
+            <h2 className="text-4xl font-bold text-white mb-4 animate-zoom-in">
+              Giriş <span className="gradient-text">Yap</span>
+            </h2>
+            <p className="text-gray-300">
+              Hesabınız yok mu?{' '}
+              <Link href="/register" className="font-medium text-primary hover:text-secondary transition-colors">
+                Kayıt olun
+              </Link>
+            </p>
+          </div>
+
+          {/* Login Type Menu Button */}
+          <div className="flex justify-center animate-slide-up">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="flex items-center gap-2 px-6 py-3 glass rounded-lg border border-primary/20 text-white hover:border-primary/40 transition-all hover-glow"
+            >
+              <Menu className="h-5 w-5" />
+              <span>Giriş Türü Seç</span>
+            </button>
+          </div>
+
+          {/* Hamburger Menu */}
+          {showMenu && (
+            <div className="glass rounded-2xl p-6 neon-border animate-zoom-in">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-white">Giriş Türü Seçin</h3>
+                <button
+                  onClick={() => setShowMenu(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              
+              <div className="space-y-3">
+                {loginOptions.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={option.action}
+                    className={`w-full p-4 glass rounded-lg border border-primary/20 hover:border-primary/40 transition-all hover-glow text-left group animate-slide-in-left`}
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`p-3 rounded-lg bg-gradient-to-br ${option.color} group-hover:scale-110 transition-transform`}>
+                        <option.icon className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-white mb-1 group-hover:text-primary transition-colors">
+                          {option.title}
+                        </h4>
+                        <p className="text-sm text-gray-400">{option.description}</p>
+                      </div>
+                      <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                    </div>
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email adresi
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-black focus:border-black focus:z-10 sm:text-sm"
-                placeholder="Email adresi"
-              />
+          {/* Login Form */}
+          {!showMenu && (
+            <div className="glass rounded-2xl p-8 neon-border animate-slide-up">
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                {error && (
+                  <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 animate-shake">
+                    <p className="text-sm text-destructive">{error}</p>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  {/* Email */}
+                  <div className="animate-slide-in-left" style={{ animationDelay: '0.1s' }}>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+                      <Mail className="inline h-4 w-4 mr-2" />
+                      Email Adresi
+                    </label>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-4 py-3 glass rounded-lg border border-primary/20 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                      placeholder="ornek@email.com"
+                    />
+                  </div>
+
+                  {/* Password */}
+                  <div className="animate-slide-in-left" style={{ animationDelay: '0.2s' }}>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+                      <Lock className="inline h-4 w-4 mr-2" />
+                      Şifre
+                    </label>
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      autoComplete="current-password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full px-4 py-3 glass rounded-lg border border-primary/20 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                </div>
+
+                {/* Remember & Forgot */}
+                <div className="flex items-center justify-between text-sm animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                  <label className="flex items-center text-gray-300">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 text-primary focus:ring-primary border-gray-600 rounded bg-transparent mr-2"
+                    />
+                    Beni hatırla
+                  </label>
+                  <Link href="/forgot-password" className="text-primary hover:text-secondary transition-colors">
+                    Şifremi unuttum
+                  </Link>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-primary to-secondary text-white font-medium rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover-glow animate-pulse-glow"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span>Giriş yapılıyor...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="h-5 w-5" />
+                      <span>Giriş Yap</span>
+                      <ArrowRight className="h-5 w-5" />
+                    </>
+                  )}
+                </button>
+              </form>
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Şifre
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-black focus:border-black focus:z-10 sm:text-sm"
-                placeholder="Şifre"
-              />
-            </div>
+          )}
+
+          {/* Back Link */}
+          <div className="text-center animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            <Link href="/" className="text-sm text-gray-400 hover:text-white transition-colors inline-flex items-center gap-2">
+              ← Ana sayfaya dön
+            </Link>
           </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Beni hatırla
-              </label>
-            </div>
-
-            <div className="text-sm">
-              <Link href="/forgot-password" className="font-medium text-black hover:underline">
-                Şifrenizi mi unuttunuz?
-              </Link>
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
-            </button>
-          </div>
-        </form>
-
-        <div className="text-center">
-          <Link href="/" className="text-sm text-gray-600 hover:text-gray-900">
-            ← Ana sayfaya dön
-          </Link>
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   )
 }
@@ -143,8 +242,11 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="text-gray-400">Yükleniyor...</p>
+        </div>
       </div>
     }>
       <LoginForm />

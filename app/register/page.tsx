@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
+import { Navbar } from '@/components/navbar'
+import { Footer } from '@/components/footer'
+import { UserPlus, Mail, Phone, Lock, User, ArrowRight, Sparkles } from 'lucide-react'
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -19,7 +22,6 @@ export default function RegisterPage() {
   const { user, register } = useAuth()
   const router = useRouter()
 
-  // Redirect if already logged in
   useEffect(() => {
     if (user) {
       router.push('/account')
@@ -37,7 +39,6 @@ export default function RegisterPage() {
     e.preventDefault()
     setError('')
 
-    // Validation
     if (formData.password.length < 8) {
       setError('Şifre en az 8 karakter olmalıdır')
       return
@@ -66,156 +67,195 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Yeni Hesap Oluşturun
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Zaten hesabınız var mı?{' '}
-            <Link href="/login" className="font-medium text-black hover:underline">
-              Giriş yapın
-            </Link>
-          </p>
-        </div>
+    <div className="min-h-screen flex flex-col relative">
+      {/* Animated background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+      </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="flex">
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">{error}</h3>
+      <Navbar />
+      
+      <main className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-md w-full space-y-8 animate-fade-in-up">
+          {/* Header */}
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 mb-6 animate-bounce-slow">
+              <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+              <span className="text-sm font-medium text-white">Yeni Üyelik</span>
+            </div>
+            
+            <h2 className="text-4xl font-bold text-white mb-4 animate-zoom-in">
+              Hesap <span className="gradient-text">Oluştur</span>
+            </h2>
+            <p className="text-gray-300">
+              Zaten hesabınız var mı?{' '}
+              <Link href="/login" className="font-medium text-primary hover:text-secondary transition-colors">
+                Giriş yapın
+              </Link>
+            </p>
+          </div>
+
+          {/* Form */}
+          <div className="glass rounded-2xl p-8 neon-border animate-slide-up">
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              {error && (
+                <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 animate-shake">
+                  <p className="text-sm text-destructive">{error}</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {/* Name */}
+                <div className="animate-slide-in-left" style={{ animationDelay: '0.1s' }}>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
+                    <User className="inline h-4 w-4 mr-2" />
+                    Ad Soyad *
+                  </label>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 glass rounded-lg border border-primary/20 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    placeholder="Ahmet Yılmaz"
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="animate-slide-in-left" style={{ animationDelay: '0.2s' }}>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+                    <Mail className="inline h-4 w-4 mr-2" />
+                    Email Adresi *
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 glass rounded-lg border border-primary/20 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    placeholder="ornek@email.com"
+                  />
+                </div>
+
+                {/* Phone */}
+                <div className="animate-slide-in-left" style={{ animationDelay: '0.3s' }}>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2">
+                    <Phone className="inline h-4 w-4 mr-2" />
+                    Telefon (Opsiyonel)
+                  </label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    autoComplete="tel"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 glass rounded-lg border border-primary/20 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    placeholder="+90 555 123 4567"
+                  />
+                </div>
+
+                {/* Password */}
+                <div className="animate-slide-in-left" style={{ animationDelay: '0.4s' }}>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+                    <Lock className="inline h-4 w-4 mr-2" />
+                    Şifre *
+                  </label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 glass rounded-lg border border-primary/20 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    placeholder="En az 8 karakter"
+                  />
+                  <p className="mt-1 text-xs text-gray-400">
+                    Şifreniz en az 8 karakter olmalıdır
+                  </p>
+                </div>
+
+                {/* Confirm Password */}
+                <div className="animate-slide-in-left" style={{ animationDelay: '0.5s' }}>
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-2">
+                    <Lock className="inline h-4 w-4 mr-2" />
+                    Şifre Tekrar *
+                  </label>
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 glass rounded-lg border border-primary/20 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    placeholder="Şifrenizi tekrar girin"
+                  />
                 </div>
               </div>
-            </div>
-          )}
 
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Ad Soyad *
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-black focus:border-black sm:text-sm"
-                placeholder="Ahmet Yılmaz"
-              />
-            </div>
+              {/* Terms */}
+              <div className="flex items-start animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+                <input
+                  id="terms"
+                  name="terms"
+                  type="checkbox"
+                  required
+                  className="h-4 w-4 mt-1 text-primary focus:ring-primary border-gray-600 rounded bg-transparent"
+                />
+                <label htmlFor="terms" className="ml-3 block text-sm text-gray-300">
+                  <Link href="/terms" className="text-primary hover:text-secondary transition-colors">
+                    Kullanım Şartları
+                  </Link>
+                  {' '}ve{' '}
+                  <Link href="/privacy" className="text-primary hover:text-secondary transition-colors">
+                    Gizlilik Politikası
+                  </Link>
+                  'nı kabul ediyorum
+                </label>
+              </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email Adresi *
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-black focus:border-black sm:text-sm"
-                placeholder="ornek@email.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Telefon (Opsiyonel)
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                autoComplete="tel"
-                value={formData.phone}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-black focus:border-black sm:text-sm"
-                placeholder="+90 555 123 4567"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Şifre *
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-black focus:border-black sm:text-sm"
-                placeholder="En az 8 karakter"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Şifreniz en az 8 karakter olmalıdır
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Şifre Tekrar *
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-black focus:border-black sm:text-sm"
-                placeholder="Şifrenizi tekrar girin"
-              />
-            </div>
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-primary to-secondary text-white font-medium rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover-glow animate-pulse-glow"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Hesap oluşturuluyor...</span>
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="h-5 w-5" />
+                    <span>Hesap Oluştur</span>
+                    <ArrowRight className="h-5 w-5" />
+                  </>
+                )}
+              </button>
+            </form>
           </div>
 
-          <div className="flex items-center">
-            <input
-              id="terms"
-              name="terms"
-              type="checkbox"
-              required
-              className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
-            />
-            <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
-              <Link href="/terms" className="text-black hover:underline">
-                Kullanım Şartları
-              </Link>
-              {' '}ve{' '}
-              <Link href="/privacy" className="text-black hover:underline">
-                Gizlilik Politikası
-              </Link>
-              'nı kabul ediyorum
-            </label>
+          {/* Back Link */}
+          <div className="text-center animate-fade-in-up" style={{ animationDelay: '0.7s' }}>
+            <Link href="/" className="text-sm text-gray-400 hover:text-white transition-colors inline-flex items-center gap-2">
+              ← Ana sayfaya dön
+            </Link>
           </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Hesap oluşturuluyor...' : 'Hesap Oluştur'}
-            </button>
-          </div>
-        </form>
-
-        <div className="text-center">
-          <Link href="/" className="text-sm text-gray-600 hover:text-gray-900">
-            ← Ana sayfaya dön
-          </Link>
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   )
 }
