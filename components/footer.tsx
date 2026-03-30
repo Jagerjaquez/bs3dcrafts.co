@@ -66,15 +66,31 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4 text-white">İletişim</h4>
             <ul className="space-y-3 text-sm text-gray-400">
-              <li className="hover:text-primary transition-colors">info@bs3dcrafts.co</li>
+              <li className="hover:text-primary transition-colors">bs3dcrafts.co@outlook.com</li>
               <li className="flex gap-4 pt-2">
-                <a href="#" className="text-white hover:text-primary transition-all hover:scale-110 hover-glow">
+                <a 
+                  href="https://www.instagram.com/bs3dcrafts.co/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-white hover:text-primary transition-all hover:scale-110 hover-glow"
+                  aria-label="Instagram"
+                >
                   <Instagram className="h-5 w-5" />
                 </a>
-                <a href="#" className="text-white hover:text-primary transition-all hover:scale-110 hover-glow">
+                <a 
+                  href="https://twitter.com/bs3dcrafts" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-white hover:text-primary transition-all hover:scale-110 hover-glow"
+                  aria-label="Twitter"
+                >
                   <Twitter className="h-5 w-5" />
                 </a>
-                <a href="mailto:info@bs3dcrafts.co" className="text-white hover:text-primary transition-all hover:scale-110 hover-glow">
+                <a 
+                  href="mailto:bs3dcrafts.co@outlook.com" 
+                  className="text-white hover:text-primary transition-all hover:scale-110 hover-glow"
+                  aria-label="Email"
+                >
                   <Mail className="h-5 w-5" />
                 </a>
               </li>
