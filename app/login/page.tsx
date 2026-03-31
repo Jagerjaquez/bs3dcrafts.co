@@ -6,7 +6,9 @@ import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { LogIn, Mail, Lock, ArrowRight, Sparkles, User, Shield, Menu, X } from 'lucide-react'
+import { WhatsAppButton } from '@/components/whatsapp-button'
+import { ScrollToTop } from '@/components/scroll-to-top'
+import { LogIn, Mail, Lock, ArrowRight, Sparkles, User, Shield, Menu, X, CheckCircle } from 'lucide-react'
 
 function LoginForm() {
   const [email, setEmail] = useState('')
@@ -141,6 +143,18 @@ function LoginForm() {
           {/* Login Form */}
           {!showMenu && (
             <div className="glass rounded-2xl p-8 neon-border animate-slide-up">
+              {/* Benefits */}
+              <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center gap-3 p-3 glass rounded-lg border border-primary/20">
+                  <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
+                  <span className="text-sm text-gray-300">Güvenli Giriş</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 glass rounded-lg border border-primary/20">
+                  <CheckCircle className="h-5 w-5 text-secondary flex-shrink-0" />
+                  <span className="text-sm text-gray-300">Hızlı Erişim</span>
+                </div>
+              </div>
+
               <form className="space-y-6" onSubmit={handleSubmit}>
                 {error && (
                   <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 animate-shake">
@@ -235,6 +249,8 @@ function LoginForm() {
       </main>
 
       <Footer />
+      <WhatsAppButton />
+      <ScrollToTop />
     </div>
   )
 }

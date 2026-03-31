@@ -3,12 +3,14 @@
 import { MessageCircle } from 'lucide-react'
 
 export function WhatsAppButton() {
-  const phoneNumber = '905XXXXXXXXX' // Telefon numaranızı buraya ekleyin (ülke kodu ile)
-  const message = 'Merhaba, ürünleriniz hakkında bilgi almak istiyorum.'
+  // WhatsApp numaranızı buraya ekleyin (ülke kodu ile, + işareti olmadan)
+  // Örnek: 905551234567
+  const phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '905XXXXXXXXX'
+  const message = 'Merhaba! BS3DCrafts ürünleri hakkında bilgi almak istiyorum.'
 
   const handleClick = () => {
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
-    window.open(url, '_blank')
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 
   return (

@@ -6,7 +6,9 @@ import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { UserPlus, Mail, Phone, Lock, User, ArrowRight, Sparkles } from 'lucide-react'
+import { WhatsAppButton } from '@/components/whatsapp-button'
+import { ScrollToTop } from '@/components/scroll-to-top'
+import { UserPlus, Mail, Phone, Lock, User, ArrowRight, Sparkles, CheckCircle, Shield } from 'lucide-react'
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -98,6 +100,22 @@ export default function RegisterPage() {
 
           {/* Form */}
           <div className="glass rounded-2xl p-8 neon-border animate-slide-up">
+            {/* Benefits */}
+            <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center gap-3 p-3 glass rounded-lg border border-primary/20">
+                <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
+                <span className="text-sm text-gray-300">Hızlı Sipariş</span>
+              </div>
+              <div className="flex items-center gap-3 p-3 glass rounded-lg border border-primary/20">
+                <CheckCircle className="h-5 w-5 text-secondary flex-shrink-0" />
+                <span className="text-sm text-gray-300">Sipariş Takibi</span>
+              </div>
+              <div className="flex items-center gap-3 p-3 glass rounded-lg border border-primary/20">
+                <CheckCircle className="h-5 w-5 text-accent flex-shrink-0" />
+                <span className="text-sm text-gray-300">Özel Kampanyalar</span>
+              </div>
+            </div>
+
             <form className="space-y-6" onSubmit={handleSubmit}>
               {error && (
                 <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 animate-shake">
@@ -256,6 +274,8 @@ export default function RegisterPage() {
       </main>
 
       <Footer />
+      <WhatsAppButton />
+      <ScrollToTop />
     </div>
   )
 }
