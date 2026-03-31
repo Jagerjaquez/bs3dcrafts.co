@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { ProductDetails } from '@/components/product-details'
+import { WhatsAppButton } from '@/components/whatsapp-button'
+import { ScrollToTop } from '@/components/scroll-to-top'
 import { prisma } from '@/lib/prisma'
 
 interface ProductPageProps {
@@ -34,6 +36,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </main>
 
       <Footer />
+      <WhatsAppButton />
+      <ScrollToTop />
     </div>
   )
 }

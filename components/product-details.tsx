@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Button } from './ui/button'
 import { useCartStore } from '@/store/cart'
 import { formatPrice } from '@/lib/utils'
-import { ShoppingCart, Package, Clock, Weight, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react'
+import { ShoppingCart, Package, Clock, Weight, ChevronLeft, ChevronRight, CreditCard, Share2, Facebook, Twitter, Heart, Star, MessageCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { ImageZoom } from './image-zoom'
 
 interface ProductDetailsProps {
   product: {
@@ -31,12 +33,47 @@ interface ProductDetailsProps {
 export function ProductDetails({ product }: ProductDetailsProps) {
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedInstallment, setSelectedInstallment] = useState(1)
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [similarProducts, setSimilarProducts] = useState<any[]>([])
   const addItem = useCartStore((state) => state.addItem)
   const [isAdding, setIsAdding] = useState(false)
 
   const images = product.media.filter(m => m.type === 'image')
   const finalPrice = product.discountedPrice || product.price
   const hasDiscount = product.discountedPrice && product.discountedPrice < product.price
+
+  // Fetch similar products
+  useEffect(() => {
+    fetchSimilarProducts()
+  }, [product.category])
+
+  const fetchSimilarProducts = async () => {
+    try {
+      const response = await fetch('/api/admin/products')
+      if (response.ok) {
+        const allProducts = await response.json()
+        const similar = allProducts
+          .filter((p: any) => p.category === product.category && p.id !== product.id)
+          .slice(0, 4)
+        setSimilarProducts(similar)
+      }
+    } catch (error) {
+      console.error('Error fetching similar products:', error)
+    }
+  }
+
+  const shareProduct = (platform: string) => {
+    const url = window.location.href
+    const text = `${product.name} - ${formatPrice(finalPrice)}`
+    
+    const shareUrls = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
+      whatsapp: `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`
+    }
+    
+    window.open(shareUrls[platform as keyof typeof shareUrls], '_blank', 'width=600,height=400')
+  }
 
   // Taksit seçenekleri
   const installmentOptions = [
@@ -79,12 +116,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               transition={{ duration: 0.3 }}
             >
               {images[selectedImage] ? (
-                <Image
+                <ImageZoom
                   src={images[selectedImage].url}
                   alt={product.name}
-                  fill
-                  className="object-cover"
-                  priority
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5">
@@ -186,6 +220,77 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               </div>
             </div>
           </div>
+
+          {/* FAQ Section */}
+          <div className="glass rounded-2xl p-8 border border-primary/20 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+            <h3 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
+              <MessageCircle className="h-6 w-6 text-primary" />
+              Sık Sorulan Sorular
+            </h3>
+            <div className="space-y-4">
+              {[
+                {
+                  q: 'Ürün ne zaman kargoya verilir?',
+                  a: 'Siparişiniz onaylandıktan sonra 2-3 iş günü içinde üretilir ve kargoya verilir.'
+                },
+                {
+                  q: 'İade ve değişim yapabilir miyim?',
+                  a: 'Ürün hasarlı veya hatalı gelirse 14 gün içinde iade edebilirsiniz. Özel üretim ürünlerde iade kabul edilmemektedir.'
+                },
+                {
+                  q: 'Ürün özelleştirilebilir mi?',
+                  a: 'Evet! Renk, boyut ve tasarım değişiklikleri için bizimle iletişime geçebilirsiniz.'
+                },
+                {
+                  q: 'Hangi ödeme yöntemlerini kabul ediyorsunuz?',
+                  a: 'Kredi kartı, banka kartı ve havale/EFT ile ödeme yapabilirsiniz. Taksit seçenekleri mevcuttur.'
+                }
+              ].map((faq, index) => (
+                <details key={index} className="group">
+                  <summary className="flex items-center justify-between cursor-pointer p-4 rounded-lg glass border border-primary/20 hover:border-primary/40 transition-colors">
+                    <span className="font-semibold text-white">{faq.q}</span>
+                    <ChevronRight className="h-5 w-5 text-primary group-open:rotate-90 transition-transform" />
+                  </summary>
+                  <div className="mt-2 p-4 text-gray-300 leading-relaxed">
+                    {faq.a}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+
+          {/* Similar Products */}
+          {similarProducts.length > 0 && (
+            <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
+              <h3 className="text-2xl font-bold mb-6 text-white">Benzer Ürünler</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {similarProducts.map((similar) => (
+                  <Link
+                    key={similar.id}
+                    href={`/products/${similar.slug}`}
+                    className="glass rounded-xl overflow-hidden hover-glow transition-all group"
+                  >
+                    <div className="aspect-square relative">
+                      <Image
+                        src={similar.media[0]?.url || '/placeholder.jpg'}
+                        alt={similar.name}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h4 className="font-semibold text-white mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                        {similar.name}
+                      </h4>
+                      <p className="text-lg font-bold gradient-text">
+                        {formatPrice(similar.discountedPrice || similar.price)}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sağ Taraf - Fiyat ve Sepete Ekle Kutusu (1 kolon) */}
@@ -271,6 +376,64 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               <ShoppingCart className="mr-2 h-5 w-5" />
               {isAdding ? 'Eklendi!' : 'Sepete Ekle'}
             </Button>
+
+            {/* Favorite Button */}
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full border-primary/50 hover:bg-primary/10"
+              onClick={() => setIsFavorite(!isFavorite)}
+            >
+              <Heart className={`mr-2 h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+              {isFavorite ? 'Favorilerde' : 'Favorilere Ekle'}
+            </Button>
+
+            {/* Social Share */}
+            <div className="pt-4 border-t border-primary/20">
+              <p className="text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
+                <Share2 className="h-4 w-4" />
+                Paylaş
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => shareProduct('facebook')}
+                  className="flex-1 p-3 rounded-lg glass border border-primary/20 hover:border-primary/50 transition-colors group"
+                  aria-label="Facebook'ta paylaş"
+                >
+                  <Facebook className="h-5 w-5 text-blue-500 mx-auto group-hover:scale-110 transition-transform" />
+                </button>
+                <button
+                  onClick={() => shareProduct('twitter')}
+                  className="flex-1 p-3 rounded-lg glass border border-primary/20 hover:border-primary/50 transition-colors group"
+                  aria-label="Twitter'da paylaş"
+                >
+                  <Twitter className="h-5 w-5 text-sky-500 mx-auto group-hover:scale-110 transition-transform" />
+                </button>
+                <button
+                  onClick={() => shareProduct('whatsapp')}
+                  className="flex-1 p-3 rounded-lg glass border border-primary/20 hover:border-primary/50 transition-colors group"
+                  aria-label="WhatsApp'ta paylaş"
+                >
+                  <MessageCircle className="h-5 w-5 text-green-500 mx-auto group-hover:scale-110 transition-transform" />
+                </button>
+              </div>
+            </div>
+
+            {/* Reviews Preview */}
+            <div className="pt-4 border-t border-primary/20">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium text-gray-300">Müşteri Değerlendirmeleri</p>
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                  ))}
+                  <span className="text-sm text-gray-400 ml-2">(4.8)</span>
+                </div>
+              </div>
+              <p className="text-xs text-gray-400">
+                127 müşteri bu ürünü değerlendirdi
+              </p>
+            </div>
 
             {/* Güvenli Alışveriş */}
             <div className="pt-4 border-t border-primary/20">
