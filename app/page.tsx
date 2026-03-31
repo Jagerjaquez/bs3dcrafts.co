@@ -3,7 +3,9 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { ArrowRight, Layers, Zap, Shield, Sparkles, Camera, Upload, Star, TrendingUp } from 'lucide-react'
+import { WhatsAppButton } from '@/components/whatsapp-button'
+import { ScrollToTop } from '@/components/scroll-to-top'
+import { ArrowRight, Layers, Zap, Shield, Sparkles, Camera, Upload, Star, TrendingUp, Quote, ChevronLeft, ChevronRight } from 'lucide-react'
 
 export default function HomePage() {
   return (
@@ -266,6 +268,155 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Testimonials Section */}
+        <section className="py-24 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/5 to-transparent" />
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center mb-16 animate-fade-in-up">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-accent/20 mb-6 animate-bounce-slow">
+                <Quote className="h-4 w-4 text-accent animate-pulse" />
+                <span className="text-sm font-medium text-white">Müşteri Yorumları</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white animate-zoom-in">
+                Müşterilerimiz <span className="gradient-text">Ne Diyor?</span>
+              </h2>
+              <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                Binlerce mutlu müşterimizden bazı yorumlar
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                {
+                  name: 'Ahmet Yılmaz',
+                  role: 'Mimar',
+                  comment: 'Proje maketlerim için kullandığım 3D baskı hizmeti mükemmel. Detaylar harika, teslimat hızlı. Kesinlikle tavsiye ederim!',
+                  rating: 5,
+                  image: '👨‍💼'
+                },
+                {
+                  name: 'Zeynep Kaya',
+                  role: 'Tasarımcı',
+                  comment: 'Özel tasarım figürler için BS3DCrafts\'ı tercih ediyorum. Kalite ve müşteri hizmetleri harika. Teşekkürler!',
+                  rating: 5,
+                  image: '👩‍🎨'
+                },
+                {
+                  name: 'Mehmet Demir',
+                  role: 'Mühendis',
+                  comment: 'Prototip üretimi için ideal. Hızlı, kaliteli ve uygun fiyatlı. Ekip çok profesyonel ve yardımsever.',
+                  rating: 5,
+                  image: '👨‍🔧'
+                }
+              ].map((testimonial, i) => (
+                <div key={i} className="animate-slide-in-bottom" style={{ animationDelay: `${i * 0.1}s` }}>
+                  <div className="glass rounded-2xl p-8 hover-glow transition-all duration-300 h-full group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 text-9xl text-primary/5 font-bold">
+                      "
+                    </div>
+                    
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="text-5xl">{testimonial.image}</div>
+                        <div>
+                          <h4 className="font-bold text-white text-lg">{testimonial.name}</h4>
+                          <p className="text-gray-400 text-sm">{testimonial.role}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-1 mb-4">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400 animate-pulse" style={{ animationDelay: `${i * 0.1}s` }} />
+                        ))}
+                      </div>
+
+                      <p className="text-gray-300 leading-relaxed italic">
+                        "{testimonial.comment}"
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Stats Section */}
+        <section className="py-24 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-secondary/5" />
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center mb-16 animate-fade-in-up">
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+                Rakamlarla <span className="gradient-text">BS3DCrafts</span>
+              </h2>
+              <p className="text-xl text-gray-300">Güvenilir ve kaliteli hizmet</p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {[
+                { number: '1000+', label: 'Mutlu Müşteri', icon: '😊' },
+                { number: '5000+', label: 'Teslim Edilen Ürün', icon: '📦' },
+                { number: '99%', label: 'Müşteri Memnuniyeti', icon: '⭐' },
+                { number: '24/7', label: 'Destek Hizmeti', icon: '💬' }
+              ].map((stat, i) => (
+                <div key={i} className="text-center animate-zoom-in" style={{ animationDelay: `${i * 0.1}s` }}>
+                  <div className="glass rounded-2xl p-8 hover-glow transition-all duration-300 group">
+                    <div className="text-5xl mb-4 animate-bounce-slow">{stat.icon}</div>
+                    <div className="text-4xl md:text-5xl font-bold gradient-text mb-2 group-hover:scale-110 transition-transform">
+                      {stat.number}
+                    </div>
+                    <div className="text-gray-300 font-medium">{stat.label}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Newsletter Section */}
+        <section className="py-24 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 animate-gradient-shift" />
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-4xl mx-auto">
+              <div className="glass rounded-3xl p-12 neon-border text-center animate-zoom-in">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 mb-6 animate-bounce-slow">
+                  <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                  <span className="text-sm font-medium text-white">Özel Fırsatlar</span>
+                </div>
+
+                <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+                  Kampanyalardan <span className="gradient-text">Haberdar Olun</span>
+                </h2>
+                
+                <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                  Yeni ürünler, özel indirimler ve kampanyalardan ilk siz haberdar olun
+                </p>
+
+                <form className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
+                  <input
+                    type="email"
+                    placeholder="E-posta adresiniz"
+                    className="flex-1 px-6 py-4 rounded-xl glass border border-primary/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary transition-colors"
+                  />
+                  <button
+                    type="submit"
+                    className="px-8 py-4 bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white font-bold rounded-xl transition-all hover-glow animate-pulse-glow whitespace-nowrap"
+                  >
+                    Abone Ol
+                  </button>
+                </form>
+
+                <p className="text-sm text-gray-400 mt-4">
+                  Dilediğiniz zaman abonelikten çıkabilirsiniz. Gizliliğinize saygı duyuyoruz.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CTA Section */}
         <section className="py-24 relative">
           <div className="container mx-auto px-4">
@@ -291,6 +442,8 @@ export default function HomePage() {
       </main>
 
       <Footer />
+      <WhatsAppButton />
+      <ScrollToTop />
     </div>
   )
 }
