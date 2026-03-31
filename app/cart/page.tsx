@@ -2,6 +2,8 @@
 
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { WhatsAppButton } from '@/components/whatsapp-button'
+import { ScrollToTop } from '@/components/scroll-to-top'
 import { CartItems } from '@/components/cart-items'
 
 export default function CartPage() {
@@ -17,6 +19,8 @@ export default function CartPage() {
       </main>
 
       <Footer />
+      <WhatsAppButton />
+      <ScrollToTop />
     </div>
   )
 }
