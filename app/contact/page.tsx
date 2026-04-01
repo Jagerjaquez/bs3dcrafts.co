@@ -18,16 +18,16 @@ export default function ContactPage() {
             <div className="glass rounded-lg p-6 text-center hover-glow animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <Mail className="h-8 w-8 text-primary mx-auto mb-4" />
               <h3 className="font-semibold mb-2 text-white">E-posta</h3>
-              <a href="mailto:info@bs3dcrafts.co" className="text-gray-300 hover:text-primary transition-colors">
-                info@bs3dcrafts.co
+              <a href="mailto:bs3dcrafts.co@outlook.com" className="text-gray-300 hover:text-primary transition-colors">
+                bs3dcrafts.co@outlook.com
               </a>
             </div>
 
             <div className="glass rounded-lg p-6 text-center hover-glow animate-slide-up" style={{ animationDelay: '0.3s' }}>
               <Phone className="h-8 w-8 text-primary mx-auto mb-4" />
               <h3 className="font-semibold mb-2 text-white">Telefon</h3>
-              <a href="tel:+905551234567" className="text-gray-300 hover:text-primary transition-colors">
-                +90 555 123 45 67
+              <a href="tel:+905464519597" className="text-gray-300 hover:text-primary transition-colors">
+                +90 546 451 95 97
               </a>
             </div>
 
@@ -35,7 +35,8 @@ export default function ContactPage() {
               <MapPin className="h-8 w-8 text-primary mx-auto mb-4" />
               <h3 className="font-semibold mb-2 text-white">Adres</h3>
               <p className="text-gray-300">
-                İstanbul, Türkiye
+                Karşıyaka, İzmir<br />
+                Türkiye
               </p>
             </div>
           </div>
