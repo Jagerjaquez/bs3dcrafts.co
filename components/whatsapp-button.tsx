@@ -3,9 +3,8 @@
 import { MessageCircle } from 'lucide-react'
 
 export function WhatsAppButton() {
-  // WhatsApp numaranızı buraya ekleyin (ülke kodu ile, + işareti olmadan)
-  // Örnek: 905551234567
-  const phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '905XXXXXXXXX'
+  // WhatsApp numarası (ülke kodu ile, + işareti olmadan)
+  const phoneNumber = '905464519597'
   const message = 'Merhaba! BS3DCrafts ürünleri hakkında bilgi almak istiyorum.'
 
   const handleClick = () => {
