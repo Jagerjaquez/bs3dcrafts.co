@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import { Instagram, Twitter, Mail, Heart } from 'lucide-react'
+import { CmsFooterNav } from '@/components/cms-footer-nav'
 
 export function Footer() {
   return (
     <footer className="relative glass border-t border-primary/10 backdrop-blur-xl mt-20">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
           <div className="space-y-4">
             <h3 className="text-xl font-bold">
               <span className="text-white gradient-text">BS3DCRAFTS</span>
@@ -15,6 +16,8 @@ export function Footer() {
               Precision in Every Layer. Profesyonel 3D baskı çözümleri.
             </p>
           </div>
+
+          <CmsFooterNav />
 
           <div>
             <h4 className="font-semibold mb-4 text-white">Kurumsal</h4>

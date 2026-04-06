@@ -76,20 +76,20 @@ export async function POST(req: NextRequest) {
     // Generate unique order ID
     const merchantOid = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
-    // Prepare basket for PayTR
+    // Prepare basket for PayTR (prices in kuruş)
     const userBasket = items.map(item => ({
       name: item.name,
-      price: item.price.toFixed(2),
+      price: (item.price * 100).toString(), // Convert to kuruş (cents)
       quantity: item.quantity,
     }))
 
     // Get app URL
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-    // Get PayTR token
+    // Get PayTR token (amount in kuruş)
     const tokenResponse = await paytr.getToken({
       merchant_oid: merchantOid,
-      payment_amount: total.toFixed(2),
+      payment_amount: (total * 100).toString(), // Convert TRY to kuruş
       currency: 'TRY',
       email: customerInfo.email,
       user_ip: userIp,

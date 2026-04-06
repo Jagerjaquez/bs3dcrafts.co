@@ -2,7 +2,18 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Package, ShoppingBag, LayoutDashboard, LogOut } from 'lucide-react'
+import {
+  Package,
+  ShoppingBag,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+  Navigation,
+  FileText,
+  Image as ImageIcon,
+  Home,
+  Database,
+} from 'lucide-react'
 import AdminAuthWrapper from '@/components/admin-auth-wrapper'
 import { Button } from '@/components/ui/button'
 
@@ -51,6 +62,48 @@ export default function AdminLayout({
             >
               <ShoppingBag className="h-5 w-5" />
               Siparişler
+            </Link>
+            <Link
+              href="/admin/content"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors text-white"
+            >
+              <Home className="h-5 w-5" />
+              Ana sayfa metinleri
+            </Link>
+            <Link
+              href="/admin/pages"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors text-white"
+            >
+              <FileText className="h-5 w-5" />
+              Sayfalar
+            </Link>
+            <Link
+              href="/admin/navigation"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors text-white"
+            >
+              <Navigation className="h-5 w-5" />
+              Navigasyon
+            </Link>
+            <Link
+              href="/admin/media"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors text-white"
+            >
+              <ImageIcon className="h-5 w-5" />
+              Medya
+            </Link>
+            <Link
+              href="/admin/settings"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors text-white"
+            >
+              <Settings className="h-5 w-5" />
+              Ayarlar
+            </Link>
+            <Link
+              href="/admin/backup"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors text-white"
+            >
+              <Database className="h-5 w-5" />
+              Yedekleme
             </Link>
           </nav>
           <div className="p-3">

@@ -21,6 +21,7 @@ model Product {
   printTimeEstimate String
   weight            Float
   featured          Boolean        @default(false)
+  status            String         @default("published") // draft or published
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
   media             ProductMedia[]
@@ -28,6 +29,7 @@ model Product {
 
   @@index([category])
   @@index([slug])
+  @@index([status])
 }
 
 model ProductMedia {
@@ -108,4 +110,117 @@ model OrderItem {
 
   @@index([orderId])
   @@index([productId])
+}
+
+// CMS Tables
+
+model SiteContent {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  section   String
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@index([section])
+}
+
+model Page {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  content         String   @db.Text
+  metaTitle       String?
+  metaDescription String?
+  keywords        String?
+  status          String   @default("draft")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([slug])
+  @@index([status])
+}
+
+model Media {
+  id         String   @id @default(cuid())
+  filename   String
+  url        String
+  type       String
+  size       Int
+  dimensions String?
+  usageCount Int      @default(0)
+  uploadedAt DateTime @default(now())
+
+  @@index([type])
+  @@index([uploadedAt])
+}
+
+model Settings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  category  String
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@index([category])
+}
+
+model Navigation {
+  id        String       @id @default(cuid())
+  type      String
+  label     String
+  url       String
+  parentId  String?
+  order     Int          @default(0)
+  createdAt DateTime     @default(now())
+  parent    Navigation?  @relation("NavigationHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Navigation[] @relation("NavigationHierarchy")
+
+  @@index([type])
+  @@index([parentId])
+  @@index([order])
+}
+
+model AdminSession {
+  id        String   @id @default(uuid())
+  adminId   String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  ipAddress String
+  userAgent String   @db.Text
+  lastUsed  DateTime @default(now())
+
+  @@index([adminId])
+  @@index([expiresAt])
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  adminId      String
+  action       String
+  resource     String
+  resourceId   String?
+  changes      Json?
+  ipAddress    String
+  userAgent    String   @db.Text
+  success      Boolean  @default(true)
+  errorMessage String?
+  timestamp    DateTime @default(now())
+
+  @@index([adminId])
+  @@index([action])
+  @@index([resource])
+  @@index([timestamp])
+}
+
+model Redirect {
+  id          String   @id @default(cuid())
+  fromPath    String   @unique
+  toPath      String
+  statusCode  Int      @default(301) // 301 permanent redirect
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([fromPath])
 }

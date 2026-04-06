@@ -64,6 +64,15 @@ export class PayTRClient {
       merchant_fail_url,
     } = request
 
+    // Debug: Log merchant config
+    console.log('=== PayTR Client Debug ===')
+    console.log('Merchant ID:', this.config.merchant_id)
+    console.log('Merchant Key (first 10 chars):', this.config.merchant_key?.substring(0, 10))
+    console.log('Merchant Salt (first 10 chars):', this.config.merchant_salt?.substring(0, 10))
+    console.log('Test Mode:', this.config.test_mode)
+    console.log('Payment Amount:', payment_amount)
+    console.log('=====================')
+
     // Encode basket as base64
     const user_basket_encoded = Buffer.from(JSON.stringify(user_basket)).toString('base64')
 

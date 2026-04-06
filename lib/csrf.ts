@@ -78,6 +78,8 @@ export async function verifyCSRFToken(request: Request): Promise<boolean> {
 
 /**
  * Middleware to require CSRF token for state-changing operations
+ * 
+ * Use this middleware for all admin POST/PUT/DELETE endpoints
  */
 export async function requireCSRFToken(request: Request): Promise<Response | null> {
   // Only check CSRF for state-changing methods
@@ -99,6 +101,31 @@ export async function requireCSRFToken(request: Request): Promise<Response | nul
         headers: { 'Content-Type': 'application/json' },
       }
     )
+  }
+  
+  return null
+}
+
+/**
+ * Combined middleware for admin routes
+ * 
+ * Checks both authentication and CSRF protection
+ * Use this for all admin API endpoints that modify data
+ */
+export async function requireAdminWithCSRF(request: Request): Promise<Response | null> {
+  // Import here to avoid circular dependency
+  const { requireAdminAuth } = await import('./admin-auth')
+  
+  // Check authentication first
+  const authError = await requireAdminAuth(request)
+  if (authError) {
+    return authError
+  }
+  
+  // Then check CSRF for state-changing operations
+  const csrfError = await requireCSRFToken(request)
+  if (csrfError) {
+    return csrfError
   }
   
   return null

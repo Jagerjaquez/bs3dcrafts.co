@@ -4,6 +4,7 @@ import { validateProductData } from '@/lib/validation'
 import { requireAdminAuth } from '@/lib/admin-auth'
 import { requireCSRFToken } from '@/lib/csrf'
 import { logAudit } from '@/lib/audit-log'
+import { revalidatePublicCatalog } from '@/lib/revalidate-catalog'
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,18 +54,20 @@ export async function POST(request: NextRequest) {
     })
 
     // Log audit
-    logAudit({
+    await logAudit({
       action: 'product_created',
       userId: 'admin',
       success: true,
       details: { productId: product.id, productName: product.name },
     })
 
+    revalidatePublicCatalog(product.slug)
+
     return NextResponse.json(product, { status: 201 })
   } catch (error) {
     console.error('Error creating product:', error)
     
-    logAudit({
+    await logAudit({
       action: 'product_created',
       userId: 'admin',
       success: false,

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { isAdminAuthenticated } from '@/lib/admin-auth'
+import { requireAdminAuth } from '@/lib/admin-auth'
+import { requireCSRFToken } from '@/lib/csrf'
+import { validateProductData } from '@/lib/validation'
+import { logAudit } from '@/lib/audit-log'
+import { revalidatePublicCatalog } from '@/lib/revalidate-catalog'
 
 export async function GET(
   request: NextRequest,
@@ -8,13 +12,8 @@ export async function GET(
 ) {
   try {
     // Check authentication
-    const isAuth = await isAdminAuthenticated()
-    if (!isAuth) {
-      return NextResponse.json(
-        { error: 'Yetkisiz erişim. Admin girişi gerekli.' },
-        { status: 401 }
-      )
-    }
+    const authError = await requireAdminAuth(request)
+    if (authError) return authError
 
     const { id } = await params
     const product = await prisma.product.findUnique({
@@ -47,33 +46,79 @@ export async function PUT(
 ) {
   try {
     // Check authentication
-    const isAuth = await isAdminAuthenticated()
-    if (!isAuth) {
-      return NextResponse.json(
-        { error: 'Yetkisiz erişim. Admin girişi gerekli.' },
-        { status: 401 }
-      )
-    }
+    const authError = await requireAdminAuth(request)
+    if (authError) return authError
+
+    // Check CSRF token
+    const csrfError = await requireCSRFToken(request)
+    if (csrfError) return csrfError
 
     const { id } = await params
     const body = await request.json()
 
-    const product = await prisma.product.update({
-      where: { id },
-      data: {
-        name: body.name,
-        slug: body.slug,
-        description: body.description,
-        price: body.price,
-        discountedPrice: body.discountedPrice,
-        stock: body.stock,
-        category: body.category,
-        material: body.material,
-        printTimeEstimate: body.printTimeEstimate,
-        weight: body.weight,
-        featured: body.featured,
-      },
+    const validation = validateProductData(body)
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.errors.join(', ') }, { status: 400 })
+    }
+
+    if (
+      body.status !== undefined &&
+      body.status !== null &&
+      !['draft', 'published'].includes(body.status)
+    ) {
+      return NextResponse.json({ error: 'Geçersiz ürün durumu' }, { status: 400 })
+    }
+
+    const existing = await prisma.product.findUnique({ where: { id } })
+    if (!existing) {
+      return NextResponse.json({ error: 'Ürün bulunamadı' }, { status: 404 })
+    }
+
+    const product = await prisma.$transaction(async (tx) => {
+      if (Array.isArray(body.images)) {
+        await tx.productMedia.deleteMany({ where: { productId: id } })
+        const urls = body.images.filter((u: unknown) => typeof u === 'string' && u.length > 0)
+        if (urls.length > 0) {
+          await tx.productMedia.createMany({
+            data: urls.map((url: string, index: number) => ({
+              productId: id,
+              type: 'image',
+              url,
+              order: index,
+            })),
+          })
+        }
+      }
+
+      return tx.product.update({
+        where: { id },
+        data: {
+          name: body.name,
+          slug: body.slug,
+          description: body.description,
+          price: body.price,
+          discountedPrice: body.discountedPrice,
+          stock: body.stock,
+          category: body.category,
+          material: body.material,
+          printTimeEstimate: body.printTimeEstimate,
+          weight: body.weight,
+          featured: body.featured,
+          ...(typeof body.status === 'string' ? { status: body.status } : {}),
+        },
+        include: { media: { orderBy: { order: 'asc' } } },
+      })
     })
+
+    await logAudit({
+      action: 'product_updated',
+      userId: 'admin',
+      success: true,
+      details: { productId: product.id, productName: product.name },
+    })
+
+    revalidatePublicCatalog(existing.slug)
+    if (product.slug !== existing.slug) revalidatePublicCatalog(product.slug)
 
     return NextResponse.json(product)
   } catch (error) {
@@ -91,18 +136,28 @@ export async function DELETE(
 ) {
   try {
     // Check authentication
-    const isAuth = await isAdminAuthenticated()
-    if (!isAuth) {
-      return NextResponse.json(
-        { error: 'Yetkisiz erişim. Admin girişi gerekli.' },
-        { status: 401 }
-      )
-    }
+    const authError = await requireAdminAuth(request)
+    if (authError) return authError
+
+    // Check CSRF token
+    const csrfError = await requireCSRFToken(request)
+    if (csrfError) return csrfError
 
     const { id } = await params
+    const existing = await prisma.product.findUnique({ where: { id } })
     await prisma.product.delete({
       where: { id },
     })
+
+    if (existing) {
+      await logAudit({
+        action: 'product_deleted',
+        userId: 'admin',
+        success: true,
+        details: { productId: id, productName: existing.name },
+      })
+      revalidatePublicCatalog(existing.slug)
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

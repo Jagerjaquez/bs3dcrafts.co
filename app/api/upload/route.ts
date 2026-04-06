@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { isAdminAuthenticated } from '@/lib/admin-auth'
+import { requireAdminAuth } from '@/lib/admin-auth'
+import { requireCSRFToken } from '@/lib/csrf'
 
 // Allowed file types
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
@@ -13,13 +14,12 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const isAuth = await isAdminAuthenticated()
-    if (!isAuth) {
-      return NextResponse.json(
-        { error: 'Yetkisiz erişim. Admin girişi gerekli.' },
-        { status: 401 }
-      )
-    }
+    const authError = await requireAdminAuth(request)
+    if (authError) return authError
+
+    // Check CSRF token
+    const csrfError = await requireCSRFToken(request)
+    if (csrfError) return csrfError
 
     const formData = await request.formData()
     const file = formData.get('file') as File

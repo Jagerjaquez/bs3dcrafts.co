@@ -4,7 +4,7 @@ import { Footer } from '@/components/footer'
 import { ProductDetails } from '@/components/product-details'
 import { WhatsAppButton } from '@/components/whatsapp-button'
 import { ScrollToTop } from '@/components/scroll-to-top'
-import { prisma } from '@/lib/prisma'
+import { getPublishedProductBySlug } from '@/lib/public-products'
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>
@@ -12,16 +12,8 @@ interface ProductPageProps {
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params
-  
-  // Database'den ürünü çek
-  const product = await prisma.product.findUnique({
-    where: { slug },
-    include: {
-      media: {
-        orderBy: { order: 'asc' }
-      }
-    }
-  })
+
+  const product = await getPublishedProductBySlug(slug)
 
   if (!product) {
     notFound()

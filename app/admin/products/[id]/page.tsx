@@ -5,15 +5,21 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ArrowLeft, Save, Trash2 } from 'lucide-react'
+import { ArrowLeft, Save, Trash2, Upload, X } from 'lucide-react'
+import Image from 'next/image'
+import { adminMultipartHeaders } from '@/lib/admin-client'
+import { MediaSelector } from '@/components/media-selector'
 import Link from 'next/link'
+import { adminJsonHeaders } from '@/lib/admin-client'
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
+  const [images, setImages] = useState<string[]>([])
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -26,31 +32,26 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     printTimeEstimate: '',
     weight: '',
     featured: false,
+    status: 'published' as 'draft' | 'published',
   })
 
   useEffect(() => {
-    // Check if admin secret exists in session storage
-    const adminSecret = sessionStorage.getItem('adminSecret')
-    if (!adminSecret) {
-      // Redirect to login page instead of prompting
-      alert('Lütfen önce admin girişi yapın.')
-      router.push('/admin/login')
-    } else {
-      setIsAuthenticated(true)
-    }
-  }, [id, router])
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchProduct()
-    }
-  }, [isAuthenticated])
+    fetchProduct()
+  }, [id])
 
   const fetchProduct = async () => {
     try {
-      const response = await fetch(`/api/admin/products/${id}`)
+      const response = await fetch(`/api/admin/products/${id}`, {
+        credentials: 'include',
+      })
       if (response.ok) {
         const product = await response.json()
+        const imageUrls =
+          product.media
+            ?.filter((m: { type: string }) => m.type === 'image')
+            .sort((a: { order: number }, b: { order: number }) => a.order - b.order)
+            .map((m: { url: string }) => m.url) || []
+        setImages(imageUrls)
         setFormData({
           name: product.name,
           slug: product.slug,
@@ -63,6 +64,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           printTimeEstimate: product.printTimeEstimate,
           weight: product.weight.toString(),
           featured: product.featured,
+          status: product.status === 'draft' ? 'draft' : 'published',
         })
       } else {
         const errorData = await response.json()
@@ -82,15 +84,15 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     try {
       const response = await fetch(`/api/admin/products/${id}`, {
         method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include',
+        headers: adminJsonHeaders(),
         body: JSON.stringify({
           ...formData,
           price: parseFloat(formData.price),
           discountedPrice: formData.discountedPrice ? parseFloat(formData.discountedPrice) : null,
           stock: parseInt(formData.stock),
           weight: parseFloat(formData.weight),
+          images,
         }),
       })
 
@@ -109,12 +111,44 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     }
   }
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files?.length) return
+    setUploadingImage(true)
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        const fd = new FormData()
+        fd.append('file', file)
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          credentials: 'include',
+          headers: adminMultipartHeaders(),
+          body: fd,
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setImages((prev) => [...prev, data.url])
+        }
+      }
+    } finally {
+      setUploadingImage(false)
+      e.target.value = ''
+    }
+  }
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index))
+  }
+
   const handleDelete = async () => {
     if (!confirm('Bu ürünü silmek istediğinizden emin misiniz?')) return
 
     try {
       const response = await fetch(`/api/admin/products/${id}`, {
         method: 'DELETE',
+        credentials: 'include',
+        headers: adminJsonHeaders(),
       })
 
       if (response.ok) {
@@ -130,7 +164,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     }
   }
 
-  if (loading || !isAuthenticated) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-white text-xl">Yükleniyor...</div>
@@ -157,6 +191,50 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       </div>
 
       <form onSubmit={handleSubmit} className="glass border border-primary/20 rounded-lg p-8 space-y-6">
+        <div className="space-y-3 md:col-span-2">
+          <label className="text-sm font-medium text-white">Ürün görselleri</label>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="cursor-pointer">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary/20 border border-primary/40 rounded-lg text-sm text-white">
+                <Upload className="h-4 w-4" />
+                {uploadingImage ? 'Yükleniyor…' : 'Dosya yükle'}
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                disabled={uploadingImage}
+                onChange={handleImageUpload}
+              />
+            </label>
+            <Button type="button" variant="outline" size="sm" onClick={() => setMediaPickerOpen(true)}>
+              Kütüphaneden seç
+            </Button>
+          </div>
+          <MediaSelector
+            open={mediaPickerOpen}
+            onClose={() => setMediaPickerOpen(false)}
+            onPick={(url) => setImages((prev) => [...prev, url])}
+          />
+          {images.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {images.map((url, index) => (
+                <div key={`${url}-${index}`} className="relative group aspect-square rounded-lg overflow-hidden border border-primary/20">
+                  <Image src={url} alt="" fill className="object-cover" unoptimized={url.startsWith('http')} />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-1 right-1 p-1 bg-red-600 rounded-full opacity-0 group-hover:opacity-100"
+                  >
+                    <X className="h-3 w-3 text-white" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Ürün Adı */}
           <div className="space-y-2">
@@ -193,6 +271,24 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               <option value="Aksesuar">Aksesuar</option>
               <option value="Oyuncak">Oyuncak</option>
               <option value="Ev & Yaşam">Ev & Yaşam</option>
+            </select>
+          </div>
+
+          {/* Yayın durumu */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-white">Yayın durumu</label>
+            <select
+              value={formData.status}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  status: e.target.value as 'draft' | 'published',
+                })
+              }
+              className="w-full px-4 py-2 bg-black/20 border border-primary/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="published">Yayında</option>
+              <option value="draft">Taslak</option>
             </select>
           </div>
 

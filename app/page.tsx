@@ -6,8 +6,11 @@ import { Footer } from '@/components/footer'
 import { WhatsAppButton } from '@/components/whatsapp-button'
 import { ScrollToTop } from '@/components/scroll-to-top'
 import { ArrowRight, Layers, Zap, Shield, Sparkles, Camera, Upload, Star, TrendingUp, Quote, ChevronLeft, ChevronRight } from 'lucide-react'
+import { getHomepageCmsFields } from '@/lib/cms-public'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const cms = await getHomepageCmsFields()
+
   return (
     <div className="min-h-screen flex flex-col relative">
       {/* Animated background elements */}
@@ -50,17 +53,19 @@ export default function HomePage() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 animate-glow animate-bounce-slow">
                 <Sparkles className="h-4 w-4 text-primary animate-wiggle" />
-                <span className="text-sm font-medium text-white">Premium 3D Printing</span>
+                <span className="text-sm font-medium text-white">{cms.hero_badge}</span>
               </div>
 
               {/* Main heading with gradient */}
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white animate-zoom-in">
-                Her Katmanda <span className="gradient-text text-hover-gradient animate-gradient-shift">Mükemmellik</span>
+                {cms.hero_title_line1}{' '}
+                <span className="gradient-text text-hover-gradient animate-gradient-shift">
+                  {cms.hero_title_gradient}
+                </span>
               </h1>
               
               <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                3D baskı teknolojisi ile üretilen premium kalite ürünler. 
-                Her detayda mükemmellik.
+                {cms.hero_subtitle}
               </p>
               
               <div className="flex justify-center animate-slide-up" style={{ animationDelay: '0.4s' }}>
@@ -70,7 +75,7 @@ export default function HomePage() {
                     
                     <span className="relative flex items-center gap-3">
                       <Sparkles className="h-6 w-6 group-hover:rotate-12 transition-transform animate-pulse" />
-                      <span className="font-bold tracking-wide">Ürünleri Keşfet</span>
+                      <span className="font-bold tracking-wide">{cms.hero_cta}</span>
                       <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform animate-bounce" />
                     </span>
                     

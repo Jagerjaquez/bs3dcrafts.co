@@ -11,11 +11,10 @@
 import { cookies, headers } from 'next/headers'
 import { createSession, validateSession, destroySession } from './session'
 import { logAudit, getFailedLoginAttempts } from './audit-log'
+import { checkRateLimit, RateLimitPresets } from './rate-limit'
 import crypto from 'crypto'
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET
-const MAX_LOGIN_ATTEMPTS = 5
-const LOCKOUT_DURATION_MINUTES = 15
 
 /**
  * Get client IP address from request
@@ -68,23 +67,25 @@ export async function authenticateAdmin(
   const ipAddress = getClientIP(request)
   const userAgent = getUserAgent(request)
   
-  // Check for rate limiting
-  const failedAttempts = getFailedLoginAttempts(ipAddress, LOCKOUT_DURATION_MINUTES)
+  // Check rate limit using new rate-limit utility
+  const rateLimitResult = checkRateLimit(ipAddress, RateLimitPresets.AUTH)
   
-  if (failedAttempts >= MAX_LOGIN_ATTEMPTS) {
-    logAudit({
+  if (!rateLimitResult.allowed) {
+    const retryAfter = Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000 / 60)
+    
+    await logAudit({
       action: 'admin_login_failed',
       userId: 'unknown',
       ipAddress,
       userAgent,
       success: false,
-      errorMessage: 'Too many failed attempts',
-      details: { failedAttempts },
+      errorMessage: 'Rate limit exceeded',
+      details: { remaining: rateLimitResult.remaining },
     })
     
     return {
       success: false,
-      error: `Çok fazla başarısız deneme. ${LOCKOUT_DURATION_MINUTES} dakika sonra tekrar deneyin.`,
+      error: `Çok fazla başarısız deneme. ${retryAfter} dakika sonra tekrar deneyin.`,
     }
   }
   
@@ -104,14 +105,14 @@ export async function authenticateAdmin(
   )
   
   if (!isValid) {
-    logAudit({
+    await logAudit({
       action: 'admin_login_failed',
       userId: 'unknown',
       ipAddress,
       userAgent,
       success: false,
       errorMessage: 'Invalid password',
-      details: { failedAttempts: failedAttempts + 1 },
+      details: { remaining: rateLimitResult.remaining },
     })
     
     return {
@@ -124,7 +125,7 @@ export async function authenticateAdmin(
   await createSession('admin', ipAddress, userAgent)
   
   // Log successful login
-  logAudit({
+  await logAudit({
     action: 'admin_login',
     userId: 'admin',
     ipAddress,
@@ -144,7 +145,7 @@ export async function logoutAdmin(request?: Request): Promise<void> {
   
   await destroySession()
   
-  logAudit({
+  await logAudit({
     action: 'admin_logout',
     userId: 'admin',
     ipAddress,
@@ -165,7 +166,7 @@ export async function requireAdminAuth(
     const ipAddress = getClientIP(request)
     const userAgent = getUserAgent(request)
     
-    logAudit({
+    await logAudit({
       action: 'admin_login_failed',
       userId: 'unknown',
       ipAddress,

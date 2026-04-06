@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { logoutAdmin } from '@/lib/admin-auth'
-import { clearCSRFToken } from '@/lib/csrf'
+import { clearCSRFToken, requireCSRFToken } from '@/lib/csrf'
 
 export async function POST(request: NextRequest) {
   try {
+    // Check CSRF token
+    const csrfError = await requireCSRFToken(request)
+    if (csrfError) return csrfError
+
     await logoutAdmin(request)
     await clearCSRFToken()
     

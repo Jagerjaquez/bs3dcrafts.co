@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/store/cart'
 import { Button } from './ui/button'
@@ -13,19 +13,12 @@ export function CheckoutForm() {
   const { items, getTotalPrice } = useCartStore()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [isTestMode, setIsTestMode] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paytr'>('stripe')
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     address: ''
   })
-
-  useEffect(() => {
-    const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''
-    setIsTestMode(publishableKey.startsWith('pk_test_'))
-  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,9 +43,7 @@ export function CheckoutForm() {
     setIsLoading(true)
 
     try {
-      const endpoint = '/api/checkout/session'
-
-      const response = await fetch(endpoint, {
+      const response = await fetch('/api/checkout/paytr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -112,36 +103,6 @@ export function CheckoutForm() {
           <p className="text-red-400 text-center">{error}</p>
         </div>
       )}
-
-      <div className="glass border border-primary/20 rounded-lg p-6">
-        <h2 className="text-2xl font-bold mb-6 text-white">Ödeme Yöntemi</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <button
-            type="button"
-            onClick={() => setPaymentMethod('paytr')}
-            className={`p-4 rounded-lg border-2 transition-all ${
-              paymentMethod === 'paytr'
-                ? 'border-primary bg-primary/20'
-                : 'border-primary/30 bg-black/30 hover:border-primary/50'
-            }`}
-          >
-            <div className="text-white font-semibold">PayTR</div>
-            <div className="text-sm text-gray-400 mt-1">Türk Lirası</div>
-          </button>
-          <button
-            type="button"
-            onClick={() => setPaymentMethod('stripe')}
-            className={`p-4 rounded-lg border-2 transition-all ${
-              paymentMethod === 'stripe'
-                ? 'border-primary bg-primary/20'
-                : 'border-primary/30 bg-black/30 hover:border-primary/50'
-            }`}
-          >
-            <div className="text-white font-semibold">Stripe</div>
-            <div className="text-sm text-gray-400 mt-1">Uluslararası</div>
-          </button>
-        </div>
-      </div>
 
       <div className="glass border border-primary/20 rounded-lg p-6">
         <h2 className="text-2xl font-bold mb-6 text-white">İletişim Bilgileri</h2>
@@ -229,27 +190,19 @@ export function CheckoutForm() {
           )}
         </Button>
 
-        {isTestMode && paymentMethod === 'stripe' && (
-          <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-            <p className="text-yellow-400 text-sm font-semibold mb-2">Test Modu - Test Kartları:</p>
-            <ul className="text-yellow-300 text-xs space-y-1">
-              <li>• Başarılı: 4242 4242 4242 4242</li>
-              <li>• Reddedildi: 4000 0000 0000 0002</li>
-              <li>• Doğrulama Gerekli: 4000 0025 0000 3155</li>
-            </ul>
-            <p className="text-yellow-300 text-xs mt-2">
-              Herhangi bir gelecek tarih, 3 haneli CVC ve posta kodu kullanabilirsiniz.
-            </p>
-          </div>
-        )}
-
-        {paymentMethod === 'paytr' && (
-          <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-            <p className="text-blue-400 text-sm">
-              PayTR ile güvenli ödeme yapabilirsiniz. Tüm Türk bankaları desteklenmektedir.
-            </p>
-          </div>
-        )}
+        <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+          <p className="text-blue-400 text-sm font-semibold mb-2">💳 Güvenli PayTR Ödemesi</p>
+          <ul className="text-blue-300 text-xs space-y-1">
+            <li>• Başarılı Test Kartı: 4355 0840 0000 0001</li>
+            <li>• Başarısız Test Kartı: 4355 0840 0000 0002</li>
+            <li>• Son Kullanma: Gelecekteki herhangi bir tarih</li>
+            <li>• CVV: 000</li>
+            <li>• 3D Şifre: 123456</li>
+          </ul>
+          <p className="text-blue-300 text-xs mt-2">
+            Tüm Türk bankaları desteklenmektedir. 12 taksit seçeneği mevcuttur.
+          </p>
+        </div>
       </div>
     </form>
   )

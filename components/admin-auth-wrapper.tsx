@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
+import { setAdminCsrfToken } from '@/lib/admin-client'
 
 export default function AdminAuthWrapper({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -24,6 +25,10 @@ export default function AdminAuthWrapper({ children }: { children: React.ReactNo
         const response = await fetch('/api/admin/check-auth')
         
         if (response.ok) {
+          const data = await response.json().catch(() => ({}))
+          if (typeof data.csrfToken === 'string' && data.csrfToken) {
+            setAdminCsrfToken(data.csrfToken)
+          }
           setIsAuthenticated(true)
         } else {
           router.push('/admin/login')

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,13 +8,15 @@ import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft, Save, Upload, X, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { adminJsonHeaders, adminMultipartHeaders } from '@/lib/admin-client'
+import { MediaSelector } from '@/components/media-selector'
 
 export default function NewProductPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
   const [images, setImages] = useState<string[]>([])
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -43,6 +45,8 @@ export default function NewProductPage() {
 
         const response = await fetch('/api/upload', {
           method: 'POST',
+          credentials: 'include',
+          headers: adminMultipartHeaders(),
           body: formData,
         })
 
@@ -73,9 +77,8 @@ export default function NewProductPage() {
     try {
       const response = await fetch('/api/admin/products', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include',
+        headers: adminJsonHeaders(),
         body: JSON.stringify({
           ...formData,
           price: parseFloat(formData.price),
@@ -101,18 +104,6 @@ export default function NewProductPage() {
     }
   }
 
-  useEffect(() => {
-    // Check if admin secret exists in session storage
-    const adminSecret = sessionStorage.getItem('adminSecret')
-    if (!adminSecret) {
-      // Redirect to login page instead of prompting
-      alert('Lütfen önce admin girişi yapın.')
-      router.push('/admin/login')
-    } else {
-      setIsAuthenticated(true)
-    }
-  }, [router])
-
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -124,16 +115,6 @@ export default function NewProductPage() {
       .replace(/ç/g, 'c')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-white text-center">
-          <p className="text-xl mb-4">Admin girişi kontrol ediliyor...</p>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -171,10 +152,19 @@ export default function NewProductPage() {
                 className="hidden"
               />
             </label>
+            <Button type="button" variant="outline" size="sm" onClick={() => setMediaPickerOpen(true)}>
+              Kütüphaneden seç
+            </Button>
             <span className="text-sm text-gray-400">
               {images.length} fotoğraf yüklendi
             </span>
           </div>
+
+          <MediaSelector
+            open={mediaPickerOpen}
+            onClose={() => setMediaPickerOpen(false)}
+            onPick={(url) => setImages((prev) => [...prev, url])}
+          />
 
           {/* Image Preview Grid */}
           {images.length > 0 && (

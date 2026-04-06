@@ -49,11 +49,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
   const fetchSimilarProducts = async () => {
     try {
-      const response = await fetch('/api/admin/products')
+      const response = await fetch('/api/products')
       if (response.ok) {
         const allProducts = await response.json()
         const similar = allProducts
-          .filter((p: any) => p.category === product.category && p.id !== product.id)
+          .filter((p: { id: string; category: string }) => p.category === product.category && p.id !== product.id)
           .slice(0, 4)
         setSimilarProducts(similar)
       }
@@ -264,7 +264,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
               <h3 className="text-2xl font-bold mb-6 text-white">Benzer Ürünler</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {similarProducts.map((similar) => (
+                {similarProducts.map((similar) => {
+                  const simImg =
+                    (similar.media || []).find((m: { type: string }) => m.type === 'image')?.url ||
+                    '/placeholder.jpg'
+                  return (
                   <Link
                     key={similar.id}
                     href={`/products/${similar.slug}`}
@@ -272,9 +276,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   >
                     <div className="aspect-square relative">
                       <Image
-                        src={similar.media[0]?.url || '/placeholder.jpg'}
+                        src={simImg}
                         alt={similar.name}
                         fill
+                        unoptimized={simImg.startsWith('http')}
                         className="object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
@@ -287,7 +292,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                       </p>
                     </div>
                   </Link>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}

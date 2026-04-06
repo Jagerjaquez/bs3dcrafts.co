@@ -8,6 +8,7 @@ import { useState, useEffect, useRef } from 'react'
 import { CartDrawer } from './cart-drawer'
 import { SearchModal } from './search-modal'
 import { useAuth } from '@/hooks/useAuth'
+import { CmsHeaderNav } from '@/components/cms-header-nav'
 
 export function Navbar() {
   const totalItems = useCartStore((state) => state.getTotalItems())
@@ -62,6 +63,10 @@ export function Navbar() {
             <Home className="h-4 w-4 text-white group-hover:scale-110 transition-transform" />
             <span className="text-sm font-medium text-white">Ana Sayfa</span>
           </Link>
+
+          <div className="flex items-center gap-2 flex-wrap max-w-md lg:max-w-xl overflow-x-auto">
+            <CmsHeaderNav />
+          </div>
 
           {/* Ürünler Dropdown */}
           <div className="relative" ref={productsRef}>

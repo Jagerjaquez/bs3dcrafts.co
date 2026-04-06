@@ -46,9 +46,9 @@ export default function TestPage() {
       updateTest(0, 'error', 'Test başarısız')
     }
 
-    // Test 2: Database Connection
+    // Test 2: Database Connection (public ürün API üzerinden)
     try {
-      const res = await fetch('/api/admin/products')
+      const res = await fetch('/api/products')
       if (res.ok) {
         updateTest(1, 'success', 'Database bağlantısı çalışıyor')
       } else {
@@ -93,26 +93,28 @@ export default function TestPage() {
       updateTest(3, 'error', 'Stripe test başarısız')
     }
 
-    // Test 5: Admin API
+    // Test 5: Admin API (girişsiz 401 beklenir)
     try {
       const res = await fetch('/api/admin/products')
-      if (res.ok) {
-        updateTest(4, 'success', 'Admin API çalışıyor')
+      if (res.status === 401) {
+        updateTest(4, 'success', 'Admin API korumalı (401)')
+      } else if (res.ok) {
+        updateTest(4, 'success', 'Admin API oturum ile erişilebilir')
       } else {
-        updateTest(4, 'error', 'Admin API hatası')
+        updateTest(4, 'error', `Admin API beklenmeyen durum: ${res.status}`)
       }
     } catch (error) {
       updateTest(4, 'error', 'Admin API erişilemedi')
     }
 
-    // Test 6: Product API
+    // Test 6: Public Product API
     try {
-      const res = await fetch('/api/admin/products')
+      const res = await fetch('/api/products')
       if (res.ok) {
         const data = await res.json()
-        updateTest(5, 'success', `${data.length} ürün bulundu`)
+        updateTest(5, 'success', `${Array.isArray(data) ? data.length : 0} yayın ürün`)
       } else {
-        updateTest(5, 'error', 'Product API hatası')
+        updateTest(5, 'error', 'Public ürün API hatası')
       }
     } catch (error) {
       updateTest(5, 'error', 'Product API erişilemedi')

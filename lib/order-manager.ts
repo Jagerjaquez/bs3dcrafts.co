@@ -108,9 +108,33 @@ export async function createOrderFromSession(
       },
     },
     include: {
-      items: true,
+      items: {
+        include: {
+          product: true,
+        },
+      },
     },
   })
+
+  // Fetch product names for email
+  const orderItemsWithNames = await Promise.all(
+    order.items.map(async (item) => {
+      const product = await prisma.product.findUnique({
+        where: { id: item.productId },
+        select: { name: true },
+      })
+      return {
+        name: product?.name || item.productId,
+        quantity: item.quantity,
+        price: item.unitPrice,
+      }
+    })
+  )
+
+  // Calculate shipping based on order total (free shipping over specified amount)
+  const SHIPPING_THRESHOLD = 500 // Free shipping over 500 TL
+  const BASE_SHIPPING = 25 // Base shipping cost 25 TL
+  const shipping = totalAmount >= SHIPPING_THRESHOLD ? 0 : BASE_SHIPPING
 
   // Send order confirmation emails (non-blocking)
   sendOrderEmails({
@@ -119,14 +143,10 @@ export async function createOrderFromSession(
     customerName: order.customerName,
     customerEmail: order.email,
     customerPhone: order.phone,
-    items: order.items.map((item) => ({
-      name: item.productId, // TODO: Fetch actual product name
-      quantity: item.quantity,
-      price: item.unitPrice,
-    })),
+    items: orderItemsWithNames,
     subtotal: totalAmount,
-    shipping: 0, // TODO: Calculate shipping
-    total: totalAmount,
+    shipping: shipping,
+    total: totalAmount + shipping,
     paymentMethod: 'Stripe',
     shippingAddress: {
       line1: order.address,

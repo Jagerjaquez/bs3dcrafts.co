@@ -4,6 +4,8 @@
  * Tracks admin actions for security and compliance
  */
 
+import { prisma } from './prisma'
+
 export type AuditAction =
   | 'admin_login'
   | 'admin_logout'
@@ -14,6 +16,19 @@ export type AuditAction =
   | 'order_status_changed'
   | 'order_viewed'
   | 'settings_changed'
+  | 'content_created'
+  | 'content_updated'
+  | 'content_deleted'
+  | 'page_created'
+  | 'page_updated'
+  | 'page_deleted'
+  | 'media_uploaded'
+  | 'media_deleted'
+  | 'navigation_created'
+  | 'navigation_updated'
+  | 'navigation_deleted'
+  | 'navigation_updated'
+  | 'navigation_deleted'
 
 export interface AuditLogEntry {
   timestamp: Date
@@ -26,14 +41,14 @@ export interface AuditLogEntry {
   errorMessage?: string
 }
 
-// In-memory audit log (in production, this should be stored in database)
+// In-memory audit log for fast access (cleared on server restart)
 const auditLogs: AuditLogEntry[] = []
 const MAX_LOGS = 1000 // Keep last 1000 entries in memory
 
 /**
- * Log an audit event
+ * Log an audit event (persisted to database)
  */
-export function logAudit(entry: Omit<AuditLogEntry, 'timestamp'>): void {
+export async function logAudit(entry: Omit<AuditLogEntry, 'timestamp'>): Promise<void> {
   const logEntry: AuditLogEntry = {
     ...entry,
     timestamp: new Date(),
@@ -56,8 +71,43 @@ export function logAudit(entry: Omit<AuditLogEntry, 'timestamp'>): void {
     details: logEntry.details,
   })
   
-  // TODO: In production, store in database
-  // await prisma.auditLog.create({ data: logEntry })
+  // Persist to database asynchronously (non-blocking)
+  try {
+    // Determine resource type from action
+    let resource = 'admin'
+    if (entry.action.includes('product')) resource = 'product'
+    else if (entry.action.includes('order')) resource = 'order'
+    else if (entry.action.includes('settings')) resource = 'settings'
+    else if (entry.action.includes('content')) resource = 'content'
+    else if (entry.action.includes('page')) resource = 'page'
+    else if (entry.action.includes('media')) resource = 'media'
+    else if (entry.action.includes('navigation')) resource = 'navigation'
+    
+    prisma.auditLog.create({
+      data: {
+        adminId: entry.userId,
+        action: entry.action,
+        resource,
+        resourceId: entry.details?.productId ||
+                    entry.details?.orderId ||
+                    entry.details?.pageId ||
+                    entry.details?.contentId ||
+                    entry.details?.contentKey ||
+                    entry.details?.mediaId ||
+                    entry.details?.navigationId ||
+                    null,
+        changes: entry.details ? entry.details : undefined,
+        ipAddress: entry.ipAddress || 'unknown',
+        userAgent: entry.userAgent || 'unknown',
+        success: entry.success,
+        errorMessage: entry.errorMessage,
+      },
+    }).catch((err) => {
+      console.error('Failed to persist audit log to database:', err)
+    })
+  } catch (error) {
+    console.error('Audit log persistence error:', error)
+  }
 }
 
 /**
@@ -128,4 +178,107 @@ export function clearOldAuditLogs(daysToKeep: number = 90): number {
   console.log(`Cleared ${removed} old audit logs`)
   
   return removed
+}
+
+/**
+ * Helper function to log admin action with automatic context
+ * 
+ * Simplifies logging by automatically extracting IP and user agent
+ */
+export async function logAdminAction(
+  action: AuditAction,
+  userId: string,
+  request?: Request,
+  details?: Record<string, any>
+): Promise<void> {
+  const ipAddress = request ? getClientIP(request) : 'unknown'
+  const userAgent = request ? request.headers.get('user-agent') || 'unknown' : 'unknown'
+  
+  await logAudit({
+    action,
+    userId,
+    ipAddress,
+    userAgent,
+    success: true,
+    details,
+  })
+}
+
+/**
+ * Helper to get client IP from request
+ */
+function getClientIP(request: Request): string {
+  const forwarded = request.headers.get('x-forwarded-for')
+  if (forwarded) {
+    return forwarded.split(',')[0].trim()
+  }
+  
+  const realIP = request.headers.get('x-real-ip')
+  if (realIP) {
+    return realIP
+  }
+  
+  return 'unknown'
+}
+
+/**
+ * Get recent audit logs from database
+ * 
+ * Fetches logs from database for admin dashboard
+ */
+export async function getRecentAuditLogs(limit: number = 50): Promise<AuditLogEntry[]> {
+  try {
+    const logs = await prisma.auditLog.findMany({
+      take: limit,
+      orderBy: { timestamp: 'desc' },
+    })
+    
+    return logs.map(log => ({
+      timestamp: log.timestamp,
+      action: log.action as AuditAction,
+      userId: log.adminId,
+      ipAddress: log.ipAddress,
+      userAgent: log.userAgent,
+      details: log.changes as Record<string, any> | undefined,
+      success: log.success,
+      errorMessage: log.errorMessage || undefined,
+    }))
+  } catch (error) {
+    console.error('Failed to fetch audit logs from database:', error)
+    return []
+  }
+}
+
+/**
+ * Get audit logs for specific resource
+ */
+export async function getResourceAuditLogs(
+  resource: string,
+  resourceId: string,
+  limit: number = 20
+): Promise<AuditLogEntry[]> {
+  try {
+    const logs = await prisma.auditLog.findMany({
+      where: {
+        resource,
+        resourceId,
+      },
+      take: limit,
+      orderBy: { timestamp: 'desc' },
+    })
+    
+    return logs.map(log => ({
+      timestamp: log.timestamp,
+      action: log.action as AuditAction,
+      userId: log.adminId,
+      ipAddress: log.ipAddress,
+      userAgent: log.userAgent,
+      details: log.changes as Record<string, any> | undefined,
+      success: log.success,
+      errorMessage: log.errorMessage || undefined,
+    }))
+  } catch (error) {
+    console.error('Failed to fetch resource audit logs:', error)
+    return []
+  }
 }

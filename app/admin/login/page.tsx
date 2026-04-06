@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Lock, Loader2 } from 'lucide-react'
+import { setAdminCsrfToken } from '@/lib/admin-client'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -35,6 +36,10 @@ export default function AdminLoginPage() {
       if (!response.ok) {
         setError(data.error || 'Giriş başarısız')
         return
+      }
+
+      if (typeof data.csrfToken === 'string' && data.csrfToken) {
+        setAdminCsrfToken(data.csrfToken)
       }
 
       // Redirect to admin panel

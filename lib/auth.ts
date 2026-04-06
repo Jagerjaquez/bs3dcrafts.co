@@ -130,3 +130,120 @@ export function getClientIp(request: NextRequest): string {
 
   return '127.0.0.1'
 }
+
+/**
+ * Session Management
+ */
+
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
+
+export interface AdminSession {
+  id: string
+  adminId: string
+  createdAt: Date
+  expiresAt: Date
+  ipAddress: string
+  userAgent: string
+  lastUsed: Date
+}
+
+/**
+ * Create admin session
+ * 
+ * Creates a new session with 24-hour expiration
+ * Tracks IP address and user agent for security
+ */
+export async function createAdminSession(
+  adminId: string,
+  request: NextRequest
+): Promise<string> {
+  const sessionId = crypto.randomUUID()
+  const now = new Date()
+  const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000) // 24 hours
+  
+  const ipAddress = getClientIp(request)
+  const userAgent = request.headers.get('user-agent') || 'unknown'
+  
+  await prisma.adminSession.create({
+    data: {
+      id: sessionId,
+      adminId,
+      createdAt: now,
+      expiresAt,
+      ipAddress,
+      userAgent,
+      lastUsed: now
+    }
+  })
+  
+  return sessionId
+}
+
+/**
+ * Verify admin session
+ * 
+ * Checks if session exists and is not expired
+ * Updates lastUsed timestamp on successful verification
+ */
+export async function verifyAdminSession(
+  sessionId: string
+): Promise<AdminSession | null> {
+  if (!sessionId) {
+    return null
+  }
+  
+  const session = await prisma.adminSession.findUnique({
+    where: { id: sessionId }
+  })
+  
+  if (!session) {
+    return null
+  }
+  
+  // Check if session is expired
+  if (new Date() > session.expiresAt) {
+    // Delete expired session
+    await prisma.adminSession.delete({
+      where: { id: sessionId }
+    })
+    return null
+  }
+  
+  // Update lastUsed timestamp
+  await prisma.adminSession.update({
+    where: { id: sessionId },
+    data: { lastUsed: new Date() }
+  })
+  
+  return session
+}
+
+/**
+ * Delete admin session (logout)
+ */
+export async function deleteAdminSession(sessionId: string): Promise<void> {
+  await prisma.adminSession.delete({
+    where: { id: sessionId }
+  }).catch(() => {
+    // Ignore errors if session doesn't exist
+  })
+}
+
+/**
+ * Clean up expired sessions
+ * 
+ * Should be called periodically to remove old sessions
+ */
+export async function cleanupExpiredSessions(): Promise<number> {
+  const result = await prisma.adminSession.deleteMany({
+    where: {
+      expiresAt: {
+        lt: new Date()
+      }
+    }
+  })
+  
+  return result.count
+}
