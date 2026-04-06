@@ -55,15 +55,19 @@ function SuccessContent() {
       const endpoint = sessionId 
         ? `/api/orders/${sessionId}` // Stripe session ID
         : `/api/orders/paytr/${orderId}` // PayTR order ID
+      
+      console.log('Fetching order from:', endpoint)
         
       fetch(endpoint)
         .then((res) => {
+          console.log('Order API response status:', res.status)
           if (!res.ok) {
-            throw new Error('Order not found')
+            throw new Error(`Order API returned ${res.status}: ${res.statusText}`)
           }
           return res.json()
         })
         .then((data) => {
+          console.log('Order data received:', data)
           setOrder(data)
           setLoading(false)
         })
@@ -72,6 +76,8 @@ function SuccessContent() {
           setError(err.message)
           setLoading(false)
         })
+    } else {
+      console.log('No order identifier found in URL params')
     }
   }, [sessionId, orderId, clearCart])
 
@@ -165,10 +171,18 @@ function SuccessContent() {
           )}
 
           {!loading && error && (
-            <div className="bg-gray-800/50 rounded-lg p-6 mb-8 border border-gray-700 text-center">
-              <p className="text-gray-300">
-                Sipariş detayları yüklenemedi, ancak ödemeniz başarıyla alındı.
+            <div className="bg-red-800/50 rounded-lg p-6 mb-8 border border-red-700 text-center">
+              <p className="text-red-300 mb-2">
+                Sipariş detayları yüklenemedi: {error}
               </p>
+              <p className="text-gray-300 text-sm">
+                Ancak ödemeniz başarıyla alındı.
+              </p>
+              {(sessionId || orderId) && (
+                <p className="text-gray-400 text-xs mt-2">
+                  Order ID: {sessionId || orderId}
+                </p>
+              )}
             </div>
           )}
 
