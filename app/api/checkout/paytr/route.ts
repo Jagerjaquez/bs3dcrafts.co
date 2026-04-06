@@ -73,8 +73,8 @@ export async function POST(req: NextRequest) {
                    req.headers.get('x-real-ip') || 
                    '127.0.0.1'
 
-    // Generate unique order ID
-    const merchantOid = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    // Generate unique order ID (alphanumeric only - no special characters for PayTR)
+    const merchantOid = `ORDER${Date.now()}${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 
     // Prepare basket for PayTR (prices in kuruş)
     const userBasket = items.map(item => ({
