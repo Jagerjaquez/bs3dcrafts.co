@@ -12,6 +12,7 @@ export interface CartItem {
 interface CartStore {
   items: CartItem[]
   isDrawerOpen: boolean
+  isHydrated: boolean
   addItem: (item: Omit<CartItem, 'quantity'>) => void
   removeItem: (id: string) => void
   updateQuantity: (id: string, quantity: number) => void
@@ -20,6 +21,7 @@ interface CartStore {
   getTotalItems: () => number
   openDrawer: () => void
   closeDrawer: () => void
+  setHydrated: () => void
 }
 
 export const useCartStore = create<CartStore>()(
@@ -27,6 +29,7 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       isDrawerOpen: false,
+      isHydrated: false,
       
       addItem: (item) => {
         const items = get().items
@@ -73,9 +76,14 @@ export const useCartStore = create<CartStore>()(
       openDrawer: () => set({ isDrawerOpen: true }),
       
       closeDrawer: () => set({ isDrawerOpen: false }),
+
+      setHydrated: () => set({ isHydrated: true }),
     }),
     {
       name: 'bs3d-cart',
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated()
+      },
     }
   )
 )

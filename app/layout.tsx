@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   authors: [{ name: "BS3DCRAFTS.CO" }],
   creator: "BS3DCRAFTS.CO",
   publisher: "BS3DCRAFTS.CO",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://bs3dcrafts.vercel.app'),
+  metadataBase: new URL('https://bs3crafts.com'),
   openGraph: {
     type: 'website',
     locale: 'tr_TR',
@@ -52,13 +52,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const baseUrl = 'https://bs3crafts.com'
+  
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'BS3DCRAFTS.CO',
     description: 'Precision in Every Layer. Profesyonel 3D baskı ürünleri.',
-    url: process.env.NEXT_PUBLIC_APP_URL || 'https://bs3dcrafts.vercel.app',
-    logo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://bs3dcrafts.vercel.app'}/logo.png`,
+    url: baseUrl,
+    logo: `${baseUrl}/logo.png`,
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer service',
@@ -69,7 +71,7 @@ export default function RootLayout({
 
   return (
     <html lang="tr" className="dark">
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
