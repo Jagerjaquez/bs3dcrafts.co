@@ -208,9 +208,9 @@ export class PayTRClient {
 
 // Singleton instance
 export const paytr = new PayTRClient({
-  merchant_id: process.env.PAYTR_MERCHANT_ID!,
-  merchant_key: process.env.PAYTR_MERCHANT_KEY!,
-  merchant_salt: process.env.PAYTR_MERCHANT_SALT!,
+  merchant_id: process.env.PAYTR_MERCHANT_ID?.trim() || '',
+  merchant_key: process.env.PAYTR_MERCHANT_KEY?.trim() || '',
+  merchant_salt: process.env.PAYTR_MERCHANT_SALT?.trim() || '',
   test_mode: process.env.PAYTR_TEST_MODE === 'true',
   no_installment: false,
   max_installment: 12,

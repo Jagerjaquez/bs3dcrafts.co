@@ -20,28 +20,59 @@ export async function GET(req: NextRequest) {
     let paytrTest = null
     try {
       if (config.merchant_id && process.env.PAYTR_MERCHANT_KEY && process.env.PAYTR_MERCHANT_SALT) {
+        // Clean merchant_id (remove any whitespace/newlines)
+        const cleanMerchantId = config.merchant_id.trim()
+        const cleanMerchantKey = process.env.PAYTR_MERCHANT_KEY.trim()
+        const cleanMerchantSalt = process.env.PAYTR_MERCHANT_SALT.trim()
+        
+        const merchantOid = 'STATUSTEST' + Date.now()
+        const paymentAmount = '100'
+        const userBasket = JSON.stringify([{name: 'Test', price: '100', quantity: 1}])
+        const userBasketEncoded = Buffer.from(userBasket).toString('base64')
+        
+        // Generate proper hash
+        const hashStr = [
+          cleanMerchantId,
+          '127.0.0.1', // user_ip
+          merchantOid,
+          'test@example.com', // email
+          paymentAmount,
+          userBasketEncoded,
+          '0', // no_installment
+          '12', // max_installment
+          'TRY', // currency
+          '1', // test_mode
+          cleanMerchantSalt
+        ].join('')
+
+        const crypto = require('crypto')
+        const paytrToken = crypto
+          .createHmac('sha256', cleanMerchantKey)
+          .update(hashStr)
+          .digest('base64')
+
         const testParams = new URLSearchParams({
-          merchant_id: config.merchant_id,
+          merchant_id: cleanMerchantId,
           user_ip: '127.0.0.1',
-          merchant_oid: 'STATUSTEST' + Date.now(),
+          merchant_oid: merchantOid,
           email: 'test@example.com',
-          payment_amount: '100',
+          payment_amount: paymentAmount,
           payment_type: 'card',
           installment_count: '0',
           currency: 'TRY',
-          test_mode: config.test_mode === 'true' ? '1' : '0',
+          test_mode: '1',
           non_3d: '0',
           merchant_ok_url: `${config.app_url}/success`,
           merchant_fail_url: `${config.app_url}/checkout`,
           user_name: 'Test User',
           user_address: 'Test Address',
           user_phone: '+905551234567',
-          user_basket: Buffer.from(JSON.stringify([{name: 'Test', price: '100', quantity: 1}])).toString('base64'),
+          user_basket: userBasketEncoded,
           debug_on: '1',
           no_installment: '0',
           max_installment: '12',
           timeout_limit: '30',
-          paytr_token: 'test_token_placeholder',
+          paytr_token: paytrToken,
           lang: 'tr',
         })
 
