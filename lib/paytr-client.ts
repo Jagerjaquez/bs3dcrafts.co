@@ -64,14 +64,26 @@ export class PayTRClient {
       merchant_fail_url,
     } = request
 
-    // Debug: Log merchant config
-    console.log('=== PayTR Client Debug ===')
-    console.log('Merchant ID:', this.config.merchant_id)
-    console.log('Merchant Key (first 10 chars):', this.config.merchant_key?.substring(0, 10))
-    console.log('Merchant Salt (first 10 chars):', this.config.merchant_salt?.substring(0, 10))
-    console.log('Test Mode:', this.config.test_mode)
-    console.log('Payment Amount:', payment_amount)
-    console.log('=====================')
+    // Validate required fields
+    if (!this.config.merchant_id || !this.config.merchant_key || !this.config.merchant_salt) {
+      console.error('PayTR configuration missing required fields')
+      return {
+        status: 'failed',
+        reason: 'PayTR configuration incomplete',
+      }
+    }
+
+    // Debug: Log merchant config (only in test mode)
+    if (this.config.test_mode) {
+      console.log('=== PayTR Client Debug ===')
+      console.log('Merchant ID:', this.config.merchant_id)
+      console.log('Merchant Key (first 10 chars):', this.config.merchant_key?.substring(0, 10))
+      console.log('Merchant Salt (first 10 chars):', this.config.merchant_salt?.substring(0, 10))
+      console.log('Test Mode:', this.config.test_mode)
+      console.log('Payment Amount:', payment_amount)
+      console.log('User Basket:', JSON.stringify(user_basket, null, 2))
+      console.log('=====================')
+    }
 
     // Encode basket as base64
     const user_basket_encoded = Buffer.from(JSON.stringify(user_basket)).toString('base64')
@@ -131,13 +143,46 @@ export class PayTRClient {
         body: params.toString(),
       })
 
+      if (!response.ok) {
+        console.error('PayTR API HTTP error:', response.status, response.statusText)
+        
+        // Response body'yi de logla
+        let errorBody = ''
+        try {
+          errorBody = await response.text()
+          console.error('PayTR API Error Body:', errorBody)
+        } catch (e) {
+          console.error('Could not read error response body')
+        }
+        
+        return {
+          status: 'failed',
+          reason: `HTTP ${response.status}: ${response.statusText}${errorBody ? ' - ' + errorBody : ''}`,
+        }
+      }
+
       const data = await response.json()
+      
+      // Log response in test mode or if there's an error
+      if (this.config.test_mode || data.status === 'failed') {
+        console.log('PayTR API Response:', data)
+      }
+      
+      // Check if PayTR returned an error in the response body
+      if (data.status === 'failed' && data.reason) {
+        console.error('PayTR API Error:', data.reason)
+        return {
+          status: 'failed',
+          reason: data.reason,
+        }
+      }
+      
       return data as PayTRTokenResponse
     } catch (error) {
       console.error('PayTR token generation error:', error)
       return {
         status: 'failed',
-        reason: 'Network error',
+        reason: error instanceof Error ? error.message : 'Network error',
       }
     }
   }
@@ -170,3 +215,13 @@ export const paytr = new PayTRClient({
   no_installment: false,
   max_installment: 12,
 })
+
+// Debug PayTR configuration on startup
+if (process.env.PAYTR_TEST_MODE === 'true') {
+  console.log('=== PayTR Configuration Debug ===')
+  console.log('Merchant ID:', process.env.PAYTR_MERCHANT_ID ? 'SET' : 'MISSING')
+  console.log('Merchant Key:', process.env.PAYTR_MERCHANT_KEY ? 'SET' : 'MISSING')
+  console.log('Merchant Salt:', process.env.PAYTR_MERCHANT_SALT ? 'SET' : 'MISSING')
+  console.log('Test Mode:', process.env.PAYTR_TEST_MODE)
+  console.log('================================')
+}

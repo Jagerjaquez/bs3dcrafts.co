@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { paytr } from '@/lib/paytr-client'
 import { checkRateLimit } from '@/lib/rate-limiter'
 import { validateCustomerData, validateOrderItems } from '@/lib/validation'
+import { createPayTROrder } from '@/lib/order-manager'
 import { 
   createErrorResponse, 
   logError, 
@@ -76,6 +77,35 @@ export async function POST(req: NextRequest) {
     // Generate unique order ID (alphanumeric only - no special characters for PayTR)
     const merchantOid = `ORDER${Date.now()}${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 
+    // Create order in database before payment
+    try {
+      await createPayTROrder({
+        merchantOid,
+        customerName: customerInfo.name,
+        email: customerInfo.email,
+        phone: customerInfo.phone,
+        address: customerInfo.address,
+        totalAmount: total,
+        items: items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        }))
+      })
+    } catch (error) {
+      logError('paytr-checkout', 'Order creation failed', {
+        error: (error as Error).message,
+        merchantOid,
+      })
+      const errorResponse = createErrorResponse(
+        'Sipariş oluşturulamadı. Lütfen tekrar deneyin.',
+        ErrorCode.GENERIC_ERROR,
+        (error as Error).message
+      )
+      return NextResponse.json(errorResponse, { status: 500 })
+    }
+
     // Prepare basket for PayTR (prices in kuruş)
     const userBasket = items.map(item => ({
       name: item.name,
@@ -101,14 +131,39 @@ export async function POST(req: NextRequest) {
       merchant_fail_url: `${appUrl}/checkout`,
     })
 
+    // Log detailed information for debugging
+    console.log('PayTR Token Request Details:', {
+      merchantOid,
+      total,
+      totalInKurus: total * 100,
+      userIp,
+      appUrl,
+      basketItems: userBasket.length,
+      environment: process.env.NODE_ENV,
+      testMode: process.env.PAYTR_TEST_MODE,
+    })
+
     if (tokenResponse.status === 'failed') {
       logError('paytr-checkout', 'Token generation failed', {
         reason: tokenResponse.reason,
         merchantOid,
+        merchantId: process.env.PAYTR_MERCHANT_ID,
+        testMode: process.env.PAYTR_TEST_MODE,
       })
+      
+      // More specific error message based on reason
+      let userMessage = 'Ödeme işlemi başlatılamadı. Lütfen tekrar deneyin.'
+      if (tokenResponse.reason?.includes('HTTP 400')) {
+        userMessage = 'Ödeme bilgileri geçersiz. Lütfen bilgilerinizi kontrol edin.'
+      } else if (tokenResponse.reason?.includes('HTTP 401')) {
+        userMessage = 'Ödeme sistemi kimlik doğrulama hatası. Lütfen daha sonra tekrar deneyin.'
+      } else if (tokenResponse.reason?.includes('Network')) {
+        userMessage = 'Ödeme sistemi bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.'
+      }
+      
       const errorResponse = createErrorResponse(
-        'Ödeme işlemi başlatılamadı. Lütfen tekrar deneyin.',
-        ErrorCode.GENERIC_ERROR,
+        userMessage,
+        ErrorCode.PAYTR_TOKEN_ERROR,
         tokenResponse.reason
       )
       return NextResponse.json(errorResponse, { status: 500 })

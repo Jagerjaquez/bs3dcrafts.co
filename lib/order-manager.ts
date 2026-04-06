@@ -49,6 +49,24 @@ export interface OrderManager {
   createOrderFromSession(session: Stripe.Checkout.Session): Promise<Order>
   updateOrderStatus(paymentIntentId: string, status: OrderStatus): Promise<Order>
   getOrderByPaymentIntent(paymentIntentId: string): Promise<Order | null>
+  createPayTROrder(orderData: PayTROrderData): Promise<Order>
+  updatePayTROrderStatus(merchantOid: string, status: OrderStatus): Promise<Order>
+  getOrderByMerchantOid(merchantOid: string): Promise<Order | null>
+}
+
+export interface PayTROrderData {
+  merchantOid: string
+  customerName: string
+  email: string
+  phone: string
+  address: string
+  totalAmount: number
+  items: Array<{
+    id: string
+    name: string
+    price: number
+    quantity: number
+  }>
 }
 
 /**
@@ -278,6 +296,153 @@ const orderManager: OrderManager = {
   createOrderFromSession,
   updateOrderStatus,
   getOrderByPaymentIntent,
+  createPayTROrder,
+  updatePayTROrderStatus,
+  getOrderByMerchantOid,
 }
 
 export default orderManager
+
+/**
+ * Creates an order for PayTR payment
+ * Implements idempotency using merchantOid to prevent duplicate orders
+ * 
+ * @param orderData - PayTR order data
+ * @returns Created or existing Order
+ * @throws Error if order data is invalid or database operation fails
+ */
+export async function createPayTROrder(orderData: PayTROrderData): Promise<Order> {
+  const { merchantOid, customerName, email, phone, address, totalAmount, items } = orderData
+
+  // Idempotency check: return existing order if already created
+  const existingOrder = await prisma.order.findUnique({
+    where: { id: merchantOid },
+  })
+
+  if (existingOrder) {
+    return existingOrder
+  }
+
+  // Validate required fields
+  if (!customerName || !email || !phone || !address) {
+    throw new Error('Missing required customer information')
+  }
+
+  if (!items || items.length === 0) {
+    throw new Error('Order must contain at least one item')
+  }
+
+  if (totalAmount <= 0) {
+    throw new Error('Order total must be greater than zero')
+  }
+
+  // Create order with items in a transaction
+  const order = await prisma.order.create({
+    data: {
+      id: merchantOid, // Use merchantOid as order ID for PayTR
+      customerName,
+      email,
+      phone,
+      address,
+      totalAmount,
+      status: 'pending',
+      stripePaymentId: null, // PayTR doesn't use Stripe
+      items: {
+        create: items.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity,
+          unitPrice: item.price,
+        })),
+      },
+    },
+    include: {
+      items: {
+        include: {
+          product: true,
+        },
+      },
+    },
+  })
+
+  // Send order confirmation emails (non-blocking)
+  const orderItemsWithNames = items.map(item => ({
+    name: item.name,
+    quantity: item.quantity,
+    price: item.price,
+  }))
+
+  // Calculate shipping based on order total (free shipping over specified amount)
+  const SHIPPING_THRESHOLD = 500 // Free shipping over 500 TL
+  const BASE_SHIPPING = 25 // Base shipping cost 25 TL
+  const shipping = totalAmount >= SHIPPING_THRESHOLD ? 0 : BASE_SHIPPING
+
+  // Send order confirmation emails (non-blocking)
+  sendOrderEmails({
+    orderNumber: `#${order.id.slice(0, 8).toUpperCase()}`,
+    orderDate: order.createdAt,
+    customerName: order.customerName,
+    customerEmail: order.email,
+    customerPhone: order.phone,
+    items: orderItemsWithNames,
+    subtotal: totalAmount,
+    shipping: shipping,
+    total: totalAmount + shipping,
+    paymentMethod: 'PayTR',
+    shippingAddress: {
+      line1: order.address,
+      city: '',
+      state: '',
+      postalCode: '',
+      country: 'Turkey',
+    },
+  }).catch((error) => {
+    console.error('Failed to send order emails:', error)
+    // Don't throw error - email failure shouldn't fail order creation
+  })
+
+  return order
+}
+
+/**
+ * Updates a PayTR order's status by merchant order ID
+ * 
+ * @param merchantOid - PayTR Merchant Order ID
+ * @param status - New order status
+ * @returns Updated Order
+ * @throws Error if order not found or status is invalid
+ */
+export async function updatePayTROrderStatus(
+  merchantOid: string,
+  status: OrderStatus
+): Promise<Order> {
+  // Validate status value
+  validateOrderStatus(status)
+
+  const order = await prisma.order.findUnique({
+    where: { id: merchantOid },
+  })
+
+  if (!order) {
+    throw new Error(`Order not found for merchant OID: ${merchantOid}`)
+  }
+
+  // Update order status
+  const updatedOrder = await prisma.order.update({
+    where: { id: merchantOid },
+    data: { status },
+  })
+
+  return updatedOrder
+}
+
+/**
+ * Retrieves an order by PayTR merchant order ID
+ * 
+ * @param merchantOid - PayTR Merchant Order ID
+ * @returns Order if found, null otherwise
+ */
+export async function getOrderByMerchantOid(merchantOid: string): Promise<Order | null> {
+  return await prisma.order.findUnique({
+    where: { id: merchantOid },
+  })
+}

@@ -35,6 +35,7 @@ interface Order {
 function SuccessContent() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session_id')
+  const orderId = searchParams.get('order_id') // PayTR order ID
   const clearCart = useCartStore((state) => state.clearCart)
   
   const [order, setOrder] = useState<Order | null>(null)
@@ -45,10 +46,17 @@ function SuccessContent() {
     // Clear cart after successful payment
     clearCart()
 
-    // Fetch order details if session_id is present
-    if (sessionId) {
+    // Fetch order details if session_id (Stripe) or order_id (PayTR) is present
+    const orderIdentifier = sessionId || orderId
+    if (orderIdentifier) {
       setLoading(true)
-      fetch(`/api/orders/${sessionId}`)
+      
+      // Use different endpoint based on payment method
+      const endpoint = sessionId 
+        ? `/api/orders/${sessionId}` // Stripe session ID
+        : `/api/orders/paytr/${orderId}` // PayTR order ID
+        
+      fetch(endpoint)
         .then((res) => {
           if (!res.ok) {
             throw new Error('Order not found')
@@ -65,7 +73,7 @@ function SuccessContent() {
           setLoading(false)
         })
     }
-  }, [sessionId, clearCart])
+  }, [sessionId, orderId, clearCart])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -148,7 +156,7 @@ function SuccessContent() {
             </div>
           )}
 
-          {!loading && !sessionId && (
+          {!loading && !sessionId && !orderId && (
             <div className="bg-gray-800/50 rounded-lg p-6 mb-8 border border-gray-700 text-center">
               <p className="text-gray-300">
                 Sipariş detayları yüklenemedi, ancak ödemeniz başarıyla alındı.

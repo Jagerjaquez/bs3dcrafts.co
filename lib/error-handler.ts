@@ -41,6 +41,9 @@ export const ERROR_MESSAGES = {
   SESSION_EXPIRED: 'Oturum süresi doldu. Lütfen tekrar deneyin.',
   RATE_LIMIT: 'Çok fazla istek gönderdiniz. Lütfen bekleyin.',
   GENERIC_ERROR: 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
+  ORDER_NOT_FOUND: 'Sipariş bulunamadı.',
+  PAYTR_TOKEN_ERROR: 'PayTR ödeme token\'ı alınamadı.',
+  PAYTR_CALLBACK_ERROR: 'PayTR geri bildirim doğrulaması başarısız.',
 } as const
 
 // Error Codes
@@ -58,6 +61,9 @@ export enum ErrorCode {
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   WEBHOOK_SIGNATURE_ERROR = 'WEBHOOK_SIGNATURE_ERROR',
   UNAUTHORIZED = 'UNAUTHORIZED',
+  NOT_FOUND = 'NOT_FOUND',
+  PAYTR_TOKEN_ERROR = 'PAYTR_TOKEN_ERROR',
+  PAYTR_CALLBACK_ERROR = 'PAYTR_CALLBACK_ERROR',
 }
 
 /**

@@ -85,22 +85,43 @@ export async function DELETE(
     if (csrfError) return csrfError
 
     const { id } = await params
-    const existing = await prisma.navigation.findUnique({ where: { id } })
+    
+    // Find the navigation item with its children to track what will be deleted
+    const existing = await prisma.navigation.findUnique({ 
+      where: { id },
+      include: { children: true }
+    })
+    
     if (!existing) {
       return NextResponse.json({ error: 'Öğe bulunamadı' }, { status: 404 })
     }
 
+    // Count children for audit logging
+    const childrenCount = existing.children.length
+
+    // Delete navigation item (cascade delete will handle children automatically)
     await prisma.navigation.delete({ where: { id } })
 
     await logAudit({
       action: 'navigation_deleted',
       userId: 'admin',
       success: true,
-      details: { navigationId: id, label: existing.label },
+      details: { 
+        navigationId: id, 
+        label: existing.label,
+        childrenDeleted: childrenCount
+      },
     })
 
+    // Invalidate cache to ensure navigation changes are reflected
     revalidatePath('/')
-    return NextResponse.json({ success: true })
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: childrenCount > 0 
+        ? `Navigasyon öğesi ve ${childrenCount} alt öğesi silindi`
+        : 'Navigasyon öğesi silindi'
+    })
   } catch (error) {
     console.error('Navigation delete error:', error)
     return NextResponse.json(

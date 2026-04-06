@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { paytr } from '@/lib/paytr-client'
-import { prisma } from '@/lib/prisma'
+import { updatePayTROrderStatus, getOrderByMerchantOid } from '@/lib/order-manager'
 import { logError } from '@/lib/error-handler'
 
 export async function POST(req: NextRequest) {
@@ -29,45 +29,37 @@ export async function POST(req: NextRequest) {
       return new NextResponse('OK', { status: 200 }) // Return OK to prevent retries
     }
 
-    // Find or create order
-    let order = await prisma.order.findFirst({
-      where: { id: merchant_oid }
-    })
+    // Find existing order
+    const order = await getOrderByMerchantOid(merchant_oid)
 
     if (!order) {
-      // Create order if it doesn't exist (shouldn't happen normally)
-      order = await prisma.order.create({
-        data: {
-          id: merchant_oid,
-          customerName: 'PayTR Customer',
-          email: 'customer@paytr.com',
-          phone: '',
-          address: '',
-          totalAmount: parseFloat(total_amount),
-          status: status === 'success' ? 'completed' : 'failed',
-        }
-      })
-    } else {
-      // Update order status
-      await prisma.order.update({
-        where: { id: merchant_oid },
-        data: {
-          status: status === 'success' ? 'completed' : 'failed',
-          totalAmount: parseFloat(total_amount),
-        }
-      })
+      logError('paytr-webhook', 'Order not found', { merchant_oid })
+      return new NextResponse('OK', { status: 200 }) // Return OK to prevent retries
     }
 
-    // Log payment details
-    console.log('PayTR Payment Callback:', {
-      merchant_oid,
-      status,
-      total_amount,
-      payment_type,
-      installment_count,
-      currency,
-      test_mode,
-    })
+    // Update order status based on payment result
+    const newStatus = status === 'success' ? 'paid' : 'failed'
+    
+    try {
+      await updatePayTROrderStatus(merchant_oid, newStatus)
+      
+      // Log payment details
+      console.log('PayTR Payment Callback:', {
+        merchant_oid,
+        status,
+        total_amount,
+        payment_type,
+        installment_count,
+        currency,
+        test_mode,
+        order_status: newStatus,
+      })
+    } catch (error) {
+      logError('paytr-webhook', 'Failed to update order status', {
+        merchant_oid,
+        error: (error as Error).message,
+      })
+    }
 
     // Return OK to PayTR
     return new NextResponse('OK', { status: 200 })
