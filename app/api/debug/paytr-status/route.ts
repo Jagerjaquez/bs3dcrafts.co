@@ -57,6 +57,7 @@ export async function GET(req: NextRequest) {
           status: response.status,
           ok: response.ok,
           statusText: response.statusText,
+          response: undefined as any
         }
 
         if (response.ok) {
