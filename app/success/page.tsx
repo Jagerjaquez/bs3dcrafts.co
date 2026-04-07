@@ -37,12 +37,20 @@ function SuccessContent() {
   const sessionId = searchParams.get('session_id')
   const orderId = searchParams.get('order_id') // PayTR order ID
   const clearCart = useCartStore((state) => state.clearCart)
+  const isHydrated = useCartStore((state) => state.isHydrated)
   
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted || !isHydrated) return
+
     // Clear cart after successful payment
     clearCart()
 
@@ -79,7 +87,26 @@ function SuccessContent() {
     } else {
       console.log('No order identifier found in URL params')
     }
-  }, [sessionId, orderId, clearCart])
+  }, [sessionId, orderId, clearCart, mounted, isHydrated])
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <TestModeBanner />
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center py-12">
+          <div className="container mx-auto px-4 max-w-2xl text-center">
+            <CheckCircle className="h-24 w-24 text-green-500 mx-auto mb-6 animate-pulse-glow" />
+            <h1 className="text-4xl font-bold mb-4 text-white">Siparişiniz Alındı!</h1>
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -163,24 +190,30 @@ function SuccessContent() {
           )}
 
           {!loading && !sessionId && !orderId && (
-            <div className="bg-gray-800/50 rounded-lg p-6 mb-8 border border-gray-700 text-center">
-              <p className="text-gray-300">
-                Sipariş detayları yüklenemedi, ancak ödemeniz başarıyla alındı.
+            <div className="bg-blue-800/50 rounded-lg p-6 mb-8 border border-blue-700 text-center">
+              <p className="text-blue-300 mb-2">
+                🎉 Ödemeniz başarıyla tamamlandı!
+              </p>
+              <p className="text-gray-300 text-sm">
+                Sipariş detayları e-posta adresinize gönderilecektir.
               </p>
             </div>
           )}
 
           {!loading && error && (
-            <div className="bg-red-800/50 rounded-lg p-6 mb-8 border border-red-700 text-center">
-              <p className="text-red-300 mb-2">
-                Sipariş detayları yüklenemedi: {error}
+            <div className="bg-yellow-800/50 rounded-lg p-6 mb-8 border border-yellow-700 text-center">
+              <p className="text-yellow-300 mb-2">
+                🎉 Ödemeniz başarıyla tamamlandı!
               </p>
-              <p className="text-gray-300 text-sm">
-                Ancak ödemeniz başarıyla alındı.
+              <p className="text-gray-300 text-sm mb-2">
+                Sipariş detayları şu anda yüklenemiyor, ancak siparişiniz alınmıştır.
+              </p>
+              <p className="text-gray-400 text-xs">
+                Hata: {error}
               </p>
               {(sessionId || orderId) && (
-                <p className="text-gray-400 text-xs mt-2">
-                  Order ID: {sessionId || orderId}
+                <p className="text-gray-400 text-xs mt-1">
+                  Sipariş Referansı: {sessionId || orderId}
                 </p>
               )}
             </div>
