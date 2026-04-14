@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     revalidatePath('/')
     revalidatePath('/api/content/homepage')
-    revalidateTag(CMS_CACHE_TAG, 'max')
+    revalidateTag('cms', 'max')
 
     return NextResponse.json({ message: 'Tamam', created })
   } catch (error) {

@@ -9,6 +9,8 @@ import { CartDrawer } from './cart-drawer'
 import { SearchModal } from './search-modal'
 import { useAuth } from '@/hooks/useAuth'
 import { CmsHeaderNav } from '@/components/cms-header-nav'
+import { CmsMobileNav } from '@/components/cms-mobile-nav'
+import { useSiteSettings } from '@/components/site-settings-provider'
 
 export function Navbar() {
   const totalItems = useCartStore((state) => state.getTotalItems())
@@ -22,10 +24,14 @@ export function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   
   const { user, logout } = useAuth()
+  const { settings } = useSiteSettings()
   
   const productsRef = useRef<HTMLDivElement>(null)
   const aboutRef = useRef<HTMLDivElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
+
+  // Get site title from settings or use default
+  const siteTitle = settings?.general?.siteTitle || 'BS3DCRAFTS'
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -51,9 +57,23 @@ export function Navbar() {
     <nav className="sticky top-0 z-50 glass border-b border-primary/10 backdrop-blur-xl">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="text-2xl font-bold tracking-tight group">
-          <span className="text-white gradient-text group-hover:opacity-80 transition-opacity">BS3DCRAFTS</span>
-          <span className="text-white">.CO</span>
+        <Link href="/" className="text-2xl font-bold tracking-tight group flex items-center gap-2">
+          {settings?.general?.logo ? (
+            <div className="flex items-center gap-2">
+              <img 
+                src={settings.general.logo} 
+                alt={siteTitle}
+                className="h-8 w-8 object-contain"
+              />
+              <span className="text-white gradient-text group-hover:opacity-80 transition-opacity">{siteTitle}</span>
+              <span className="text-white">.CO</span>
+            </div>
+          ) : (
+            <>
+              <span className="text-white gradient-text group-hover:opacity-80 transition-opacity">{siteTitle}</span>
+              <span className="text-white">.CO</span>
+            </>
+          )}
         </Link>
 
         {/* Desktop Menu */}
@@ -64,6 +84,7 @@ export function Navbar() {
             <span className="text-sm font-medium text-white">Ana Sayfa</span>
           </Link>
 
+          {/* Dynamic CMS Navigation */}
           <div className="flex items-center gap-2 flex-wrap max-w-md lg:max-w-xl overflow-x-auto">
             <CmsHeaderNav />
           </div>
@@ -330,6 +351,9 @@ export function Navbar() {
               <Home className="h-4 w-4" />
               Ana Sayfa
             </Link>
+
+            {/* Dynamic CMS Navigation for Mobile */}
+            <CmsMobileNav onItemClick={() => setIsMenuOpen(false)} />
             
             <div className="space-y-2">
               <p className="text-sm font-semibold text-primary">Ürünler</p>

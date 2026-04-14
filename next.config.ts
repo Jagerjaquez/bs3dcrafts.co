@@ -1,9 +1,12 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from '@sentry/nextjs'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  reactCompiler: true,
+  // Enable React Compiler for better performance
+  experimental: {
+    reactCompiler: true,
+  },
+  
+  // Image optimization configuration
   images: {
     remotePatterns: [
       {
@@ -13,18 +16,24 @@ const nextConfig: NextConfig = {
         pathname: '/storage/v1/object/public/**',
       },
     ],
+    // Add formats for better performance
+    formats: ['image/webp', 'image/avif'],
   },
   
-  // Security Headers for Production
+  // Disable telemetry for better performance
+  telemetry: {
+    disabled: true,
+  },
+  
+  // Output configuration for Vercel
+  output: 'standalone',
+  
+  // Security Headers (simplified for deployment)
   async headers() {
     return [
       {
         source: '/:path*',
         headers: [
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload'
-          },
           {
             key: 'X-Frame-Options',
             value: 'DENY'
@@ -34,70 +43,23 @@ const nextConfig: NextConfig = {
             value: 'nosniff'
           },
           {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          },
-          {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin'
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()'
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.sentry.io",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https:",
-              "font-src 'self' data:",
-              "connect-src 'self' https: wss:",
-              "frame-src https://js.stripe.com https://hooks.stripe.com",
-            ].join('; '),
           },
         ]
       }
     ]
   },
+  
+  // Rewrites for Sentry tunnel (if needed)
+  async rewrites() {
+    return [
+      {
+        source: '/monitoring/:path*',
+        destination: 'https://o4507896268513280.ingest.us.sentry.io/:path*',
+      },
+    ]
+  },
 };
 
-// Sentry configuration
-const sentryConfig = {
-  // Sentry auth token for uploading source maps
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-  
-  // Sentry organization and project
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-  
-  // Only upload source maps in production
-  silent: true,
-  
-  // Disable source map upload if no auth token
-  dryRun: !process.env.SENTRY_AUTH_TOKEN,
-  
-  // Automatically tree-shake Sentry logger statements
-  disableLogger: true,
-  
-  // Hide source maps from generated client bundles
-  hideSourceMaps: true,
-  
-  // Transpile SDK to be compatible with IE11
-  transpileClientSDK: true,
-  
-  // Route browser requests to Sentry through a Next.js rewrite
-  tunnelRoute: '/monitoring',
-  
-  // Automatically instrument Next.js data fetching methods
-  autoInstrumentServerFunctions: true,
-  
-  // Automatically instrument Next.js API routes
-  autoInstrumentMiddleware: true,
-}
-
-// Export with Sentry if DSN is configured
-export default process.env.NEXT_PUBLIC_SENTRY_DSN
-  ? withSentryConfig(nextConfig, sentryConfig)
-  : nextConfig;
+export default nextConfig;

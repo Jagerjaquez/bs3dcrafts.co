@@ -1,15 +1,24 @@
 'use client'
 
 import { MessageCircle } from 'lucide-react'
+import { useSiteSettings } from '@/components/site-settings-provider'
 
 export function WhatsAppButton() {
-  // WhatsApp numarası (ülke kodu ile, + işareti olmadan)
-  const phoneNumber = '905464519597'
+  const { settings } = useSiteSettings()
+  
+  // Get WhatsApp settings from dynamic settings
+  const whatsappEnabled = settings?.features?.whatsappButton === true
+  const phoneNumber = settings?.contact?.whatsappNumber || '905464519597'
   const message = 'Merhaba! BS3DCrafts ürünleri hakkında bilgi almak istiyorum.'
 
   const handleClick = () => {
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
     window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  // Don't render if disabled in settings
+  if (!whatsappEnabled) {
+    return null
   }
 
   return (

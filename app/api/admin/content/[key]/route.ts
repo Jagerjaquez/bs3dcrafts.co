@@ -68,9 +68,12 @@ export async function PUT(
       details: { contentKey: key },
     })
 
+    // Enhanced cache invalidation for performance optimization
     revalidatePath('/')
     revalidatePath('/api/content/homepage')
-    revalidateTag(CMS_CACHE_TAG, 'max')
+    revalidateTag('cms', 'max')
+    revalidateTag('homepage-content', 'max')
+    revalidateTag('public-content', 'max')
 
     return NextResponse.json(content)
   } catch (error) {
@@ -132,9 +135,12 @@ export async function DELETE(
       details: { contentKey: key },
     })
 
+    // Enhanced cache invalidation for performance optimization
     revalidatePath('/')
     revalidatePath('/api/content/homepage')
-    revalidateTag(CMS_CACHE_TAG, 'max')
+    revalidateTag('cms', 'max')
+    revalidateTag('homepage-content', 'max')
+    revalidateTag('public-content', 'max')
 
     return NextResponse.json({ message: 'Başarıyla silindi' })
   } catch (error) {

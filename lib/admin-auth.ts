@@ -12,9 +12,11 @@ import { cookies, headers } from 'next/headers'
 import { createSession, validateSession, destroySession } from './session'
 import { logAudit, getFailedLoginAttempts } from './audit-log'
 import { checkRateLimit, RateLimitPresets } from './rate-limit'
+import { verifyPassword } from './password-hash'
 import crypto from 'crypto'
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH
 
 /**
  * Get client IP address from request
@@ -89,20 +91,28 @@ export async function authenticateAdmin(
     }
   }
   
-  // Validate admin secret
-  if (!ADMIN_SECRET) {
-    console.error('ADMIN_SECRET not configured')
+  // Validate admin password
+  let isValid = false
+  
+  // Check if we have a hashed password (new method)
+  if (ADMIN_PASSWORD_HASH) {
+    isValid = await verifyPassword(password, ADMIN_PASSWORD_HASH)
+  } 
+  // Fallback to plain text comparison (legacy method)
+  else if (ADMIN_SECRET) {
+    console.warn('Using legacy plain text password. Please migrate to hashed password.')
+    // Constant-time comparison to prevent timing attacks
+    isValid = crypto.timingSafeEqual(
+      Buffer.from(password),
+      Buffer.from(ADMIN_SECRET)
+    )
+  } else {
+    console.error('No admin password configured (ADMIN_PASSWORD_HASH or ADMIN_SECRET)')
     return {
       success: false,
       error: 'Sunucu yapılandırma hatası',
     }
   }
-  
-  // Constant-time comparison to prevent timing attacks
-  const isValid = crypto.timingSafeEqual(
-    Buffer.from(password),
-    Buffer.from(ADMIN_SECRET)
-  )
   
   if (!isValid) {
     await logAudit({

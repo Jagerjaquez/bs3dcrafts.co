@@ -49,6 +49,10 @@ async function main() {
     // Analytics (empty by default)
     { key: 'analytics.google_id', value: '', category: 'analytics' },
     { key: 'analytics.facebook_pixel', value: '', category: 'analytics' },
+    
+    // SEO settings
+    { key: 'robots.allow_crawling', value: 'true', category: 'seo' },
+    { key: 'robots.disallow_paths', value: '[]', category: 'seo' },
   ]
 
   for (const setting of settings) {

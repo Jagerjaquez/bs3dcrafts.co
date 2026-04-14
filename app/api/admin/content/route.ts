@@ -14,6 +14,7 @@ import { ContentSchema } from '@/lib/cms-validation'
 import { logAudit } from '@/lib/audit-log'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { CMS_CACHE_TAG } from '@/lib/cms-public'
+import { withAdminSecurityHeaders, createSecureErrorResponse } from '@/lib/security-headers'
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,13 +25,11 @@ export async function GET(request: NextRequest) {
       orderBy: { section: 'asc' },
     })
 
-    return NextResponse.json(content)
+    const response = NextResponse.json(content)
+    return withAdminSecurityHeaders(response)
   } catch (error) {
     console.error('Error fetching content:', error)
-    return NextResponse.json(
-      { error: 'İçerik getirilemedi' },
-      { status: 500 }
-    )
+    return createSecureErrorResponse('İçerik getirilemedi', 500)
   }
 }
 
@@ -47,9 +46,9 @@ export async function POST(request: NextRequest) {
     // Validate input
     const validation = ContentSchema.safeParse(body)
     if (!validation.success) {
-      return NextResponse.json(
-        { error: 'Geçersiz veri', details: validation.error.format() },
-        { status: 400 }
+      return createSecureErrorResponse(
+        'Geçersiz veri',
+        400
       )
     }
 
@@ -61,10 +60,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (existing) {
-      return NextResponse.json(
-        { error: 'Bu anahtar zaten mevcut' },
-        { status: 409 }
-      )
+      return createSecureErrorResponse('Bu anahtar zaten mevcut', 409)
     }
 
     const content = await prisma.siteContent.create({
@@ -84,9 +80,10 @@ export async function POST(request: NextRequest) {
 
     revalidatePath('/')
     revalidatePath('/api/content/homepage')
-    revalidateTag(CMS_CACHE_TAG, 'max')
+    revalidateTag('cms', 'max')
 
-    return NextResponse.json(content, { status: 201 })
+    const response = NextResponse.json(content, { status: 201 })
+    return withAdminSecurityHeaders(response)
   } catch (error) {
     console.error('Error creating content:', error)
     await logAudit({
@@ -96,9 +93,6 @@ export async function POST(request: NextRequest) {
       errorMessage: error instanceof Error ? error.message : 'Unknown error',
     })
     
-    return NextResponse.json(
-      { error: 'İçerik oluşturulamadı' },
-      { status: 500 }
-    )
+    return createSecureErrorResponse('İçerik oluşturulamadı', 500)
   }
 }

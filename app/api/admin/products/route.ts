@@ -87,14 +87,70 @@ export async function GET(request: NextRequest) {
     const authError = await requireAdminAuth(request)
     if (authError) return authError
 
-    const products = await prisma.product.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        media: true,
-      },
-    })
+    // Parse query parameters for pagination and filtering
+    const { searchParams } = new URL(request.url)
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '20')
+    const status = searchParams.get('status')
+    const category = searchParams.get('category')
+    const search = searchParams.get('search')
+    
+    const skip = (page - 1) * limit
 
-    return NextResponse.json(products)
+    // Build where clause
+    const where: any = {}
+    if (status) where.status = status
+    if (category) where.category = category
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } }
+      ]
+    }
+
+    // Optimized query with pagination and select only needed fields
+    const [products, totalCount] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          price: true,
+          discountedPrice: true,
+          stock: true,
+          category: true,
+          status: true,
+          featured: true,
+          createdAt: true,
+          updatedAt: true,
+          media: {
+            select: {
+              id: true,
+              url: true,
+              type: true,
+              order: true
+            },
+            orderBy: { order: 'asc' },
+            take: 1 // Only get first image for list view
+          }
+        }
+      }),
+      prisma.product.count({ where })
+    ])
+
+    return NextResponse.json({
+      products,
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        pages: Math.ceil(totalCount / limit)
+      }
+    })
   } catch (error) {
     console.error('Error fetching products:', error)
     return NextResponse.json(

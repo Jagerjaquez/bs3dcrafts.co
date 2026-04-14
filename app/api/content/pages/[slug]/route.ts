@@ -12,8 +12,20 @@ export async function GET(
 ) {
   try {
     const { slug } = await params
+    
+    // Optimized query with select only needed fields
     const page = await prisma.page.findUnique({
       where: { slug },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        metaTitle: true,
+        metaDescription: true,
+        keywords: true,
+        status: true,
+        updatedAt: true
+      }
     })
 
     if (!page || page.status !== 'published') {
@@ -21,10 +33,15 @@ export async function GET(
     }
 
     const response = NextResponse.json(page)
+    
+    // Enhanced caching headers for performance optimization
     response.headers.set(
       'Cache-Control',
-      'public, s-maxage=300, stale-while-revalidate=600'
+      'public, s-maxage=300, stale-while-revalidate=600, max-age=60'
     )
+    response.headers.set('Vary', 'Accept-Encoding')
+    response.headers.set('ETag', `"page-${slug}-${page.updatedAt.getTime()}"`)
+    response.headers.set('Last-Modified', page.updatedAt.toUTCString())
 
     return response
   } catch (error) {

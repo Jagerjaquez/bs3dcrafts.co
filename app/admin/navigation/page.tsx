@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { adminJsonHeaders } from '@/lib/admin-client'
+import { useToast } from '@/contexts/toast-context'
 
 type NavItem = {
   id: string
@@ -26,6 +27,7 @@ export default function AdminNavigationPage() {
     order: 0,
   })
   const [editingId, setEditingId] = useState<string | null>(null)
+  const { showSuccess, showError } = useToast()
 
   const load = async () => {
     setLoading(true)
@@ -58,9 +60,10 @@ export default function AdminNavigationPage() {
     })
     if (!res.ok) {
       const d = await res.json().catch(() => ({}))
-      alert((d as { error?: string }).error || 'Hata')
+      showError('Navigasyon öğesi eklenemedi', (d as { error?: string }).error || 'Bilinmeyen hata oluştu')
       return
     }
+    showSuccess('Navigasyon öğesi eklendi', 'Yeni navigasyon öğesi başarıyla oluşturuldu')
     setForm({ type: form.type, label: '', url: '/', parentId: '', order: 0 })
     load()
   }
@@ -80,9 +83,10 @@ export default function AdminNavigationPage() {
     })
     if (!res.ok) {
       const d = await res.json().catch(() => ({}))
-      alert((d as { error?: string }).error || 'Hata')
+      showError('Navigasyon öğesi güncellenemedi', (d as { error?: string }).error || 'Bilinmeyen hata oluştu')
       return
     }
+    showSuccess('Navigasyon öğesi güncellendi', 'Değişiklikler başarıyla kaydedildi')
     setEditingId(null)
     load()
   }
@@ -96,9 +100,10 @@ export default function AdminNavigationPage() {
     })
     if (!res.ok) {
       const d = await res.json().catch(() => ({}))
-      alert((d as { error?: string }).error || 'Hata')
+      showError('Navigasyon öğesi silinemedi', (d as { error?: string }).error || 'Bilinmeyen hata oluştu')
       return
     }
+    showSuccess('Navigasyon öğesi silindi', 'Öğe başarıyla kaldırıldı')
     load()
   }
 

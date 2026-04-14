@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { requireAdminAuth } from '@/lib/admin-auth'
 import { requireCSRFToken } from '@/lib/csrf'
 import { logAudit } from '@/lib/audit-log'
+import { sendOrderStatusEmail } from '@/lib/email-service'
 
 const STATUSES = ['pending', 'paid', 'shipped', 'completed', 'cancelled'] as const
 type OrderStatus = (typeof STATUSES)[number]
@@ -35,7 +36,20 @@ export async function PUT(
       )
     }
 
-    const existing = await prisma.order.findUnique({ where: { id } })
+    // If status is "shipped", require trackingNumber
+    if (status === 'shipped' && (!trackingNumber || trackingNumber.length === 0)) {
+      return NextResponse.json(
+        { error: 'Kargo durumu için takip numarası gereklidir' },
+        { status: 400 }
+      )
+    }
+
+    const existing = await prisma.order.findUnique({ 
+      where: { id },
+      include: {
+        items: { include: { product: true } }
+      }
+    })
     if (!existing) {
       return NextResponse.json({ error: 'Sipariş bulunamadı' }, { status: 404 })
     }
@@ -53,6 +67,26 @@ export async function PUT(
       },
     })
 
+    // Send email notification to customer
+    try {
+      await sendOrderStatusEmail({
+        customerEmail: order.email,
+        customerName: order.customerName,
+        orderId: order.id,
+        status: status,
+        trackingNumber: trackingNumber || order.trackingNumber || undefined,
+        orderItems: order.items.map(item => ({
+          name: item.product.name,
+          quantity: item.quantity,
+          price: item.unitPrice
+        })),
+        totalAmount: order.totalAmount
+      })
+    } catch (emailError) {
+      console.error('Failed to send order status email:', emailError)
+      // Don't fail the request if email fails - log it and continue
+    }
+
     await logAudit({
       action: 'order_status_changed',
       userId: 'admin',
@@ -62,6 +96,7 @@ export async function PUT(
         previousStatus: existing.status,
         newStatus: status,
         trackingNumber: trackingNumber ?? existing.trackingNumber,
+        customerEmail: order.email
       },
     })
 

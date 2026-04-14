@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { getPublishedPageSlugs } from '@/lib/cms-public'
+import { prisma } from '@/lib/prisma'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bs3dcrafts.vercel.app'
@@ -13,18 +14,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
   ]
 
-  let cmsPages: MetadataRoute.Sitemap = []
+  // Get published dynamic pages
+  let dynamicPages: MetadataRoute.Sitemap = []
   try {
-    const published = await getPublishedPageSlugs()
-    cmsPages = published.map((p) => ({
-      url: `${baseUrl}/sayfa/${p.slug}`,
-      lastModified: p.updatedAt,
+    const publishedPages = await getPublishedPageSlugs()
+    dynamicPages = publishedPages.map((page) => ({
+      url: `${baseUrl}/${page.slug}`,
+      lastModified: page.updatedAt,
       changeFrequency: 'weekly' as const,
       priority: 0.6,
     }))
-  } catch {
-    /* ignore */
+  } catch (error) {
+    console.error('Error fetching published pages for sitemap:', error)
   }
 
-  return [...staticPages, ...cmsPages]
+  // Get published products
+  let productPages: MetadataRoute.Sitemap = []
+  try {
+    const publishedProducts = await prisma.product.findMany({
+      where: { status: 'published' },
+      select: { slug: true, updatedAt: true },
+    })
+    
+    productPages = publishedProducts.map((product) => ({
+      url: `${baseUrl}/products/${product.slug}`,
+      lastModified: product.updatedAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    }))
+  } catch (error) {
+    console.error('Error fetching published products for sitemap:', error)
+  }
+
+  return [...staticPages, ...dynamicPages, ...productPages]
 }

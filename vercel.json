@@ -1,15 +1,12 @@
 {
+  "framework": "nextjs",
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
-  "framework": "nextjs",
   "regions": ["iad1"],
-  "env": {
-    "NODE_ENV": "production"
-  },
-  "build": {
-    "env": {
-      "NEXT_TELEMETRY_DISABLED": "1"
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
     }
   },
   "headers": [
@@ -27,8 +24,18 @@
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
         }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/monitoring/:path*",
+      "destination": "https://o4507896268513280.ingest.us.sentry.io/:path*"
     }
   ]
 }

@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { SWRProvider } from '@/components/swr-provider'
+import { SiteSettingsProvider } from '@/components/site-settings-provider'
+import { CacheStatus } from '@/components/cache-status'
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -76,7 +79,12 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        {children}
+        <SWRProvider>
+          <SiteSettingsProvider>
+            {children}
+            <CacheStatus />
+          </SiteSettingsProvider>
+        </SWRProvider>
       </body>
     </html>
   );

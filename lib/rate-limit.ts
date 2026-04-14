@@ -5,6 +5,8 @@
  * Prevents abuse and brute force attacks
  */
 
+import { logRateLimitViolation } from './monitoring'
+
 export interface RateLimitConfig {
   windowMs: number      // Time window in milliseconds
   maxRequests: number   // Maximum requests allowed in window
@@ -127,6 +129,14 @@ export async function rateLimitMiddleware(
   
   if (!result.allowed) {
     const retryAfter = Math.ceil((result.resetTime - Date.now()) / 1000)
+    
+    // Log rate limit violation
+    logRateLimitViolation(new URL(request.url).pathname, {
+      ipAddress: identifier,
+      userAgent: request.headers.get('user-agent') || undefined,
+      requestCount: config.maxRequests,
+      windowMs: config.windowMs
+    })
     
     return new Response(
       JSON.stringify({

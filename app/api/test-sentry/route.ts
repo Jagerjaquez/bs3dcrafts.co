@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server'
-import { trackError, trackEvent, BusinessMetrics, SecurityEvents } from '@/lib/monitoring'
+import { logAPIError, logSecurityEvent, logCMSOperation } from '@/lib/monitoring'
 
 export async function GET() {
   try {
     // Test 1: Basic error tracking
     throw new Error('Test error from Sentry - This is a test!')
   } catch (error) {
-    trackError(error as Error, {
-      category: 'test',
-      severity: 'low',
-      metadata: { 
+    logAPIError(error as Error, {
+      action: 'test_error',
+      resource: 'sentry_test',
+      additionalData: { 
         test: true,
         timestamp: new Date().toISOString(),
         testType: 'basic_error'
@@ -17,24 +17,23 @@ export async function GET() {
     })
   }
 
-  // Test 2: Custom event
-  trackEvent({
-    name: 'sentry_test_event',
-    category: 'test',
+  // Test 2: Security event
+  logSecurityEvent({
+    type: 'suspicious_activity',
     severity: 'low',
-    metadata: {
+    ipAddress: '127.0.0.1',
+    details: {
       test: true,
-      eventType: 'custom_event'
-    },
+      eventType: 'test_security_event'
+    }
   })
 
-  // Test 3: Business metric
-  BusinessMetrics.orderCreated('test-order-123', 299.99)
-
-  // Test 4: Security event
-  SecurityEvents.suspiciousActivity('Test security event', {
-    test: true,
-    ipAddress: '127.0.0.1'
+  // Test 3: CMS operation
+  logCMSOperation('create', 'test_resource', {
+    adminId: 'test-admin',
+    resourceId: 'test-123',
+    success: true,
+    changes: { test: true }
   })
 
   return NextResponse.json({ 
@@ -42,9 +41,8 @@ export async function GET() {
     message: 'Test events sent to Sentry',
     tests: [
       'Basic error tracking',
-      'Custom event',
-      'Business metric',
-      'Security event'
+      'Security event',
+      'CMS operation'
     ],
     note: 'Check your Sentry dashboard at https://sentry.io'
   })

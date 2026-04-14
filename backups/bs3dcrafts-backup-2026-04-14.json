@@ -1,0 +1,410 @@
+{
+  "exportedAt": "2026-04-14T20:59:19.927Z",
+  "version": "1.0",
+  "sections": {
+    "content": [
+      {
+        "id": "cmnjhjg050005e9mgaesjg81n",
+        "key": "hero_badge",
+        "value": {
+          "text": "3D BASKI HİZMETLERİ VE ÇÖZÜMLERİ"
+        },
+        "section": "homepage",
+        "updatedAt": "2026-04-03T22:47:04.924Z"
+      },
+      {
+        "id": "cmnjhjhvq0009e9mggoxd70ml",
+        "key": "hero_cta",
+        "value": {
+          "text": "Ürünleri Keşfet"
+        },
+        "section": "homepage",
+        "updatedAt": "2026-04-03T22:38:44.294Z"
+      },
+      {
+        "id": "cmnjhjhfg0008e9mg6lzcemrv",
+        "key": "hero_subtitle",
+        "value": {
+          "text": "3D baskı teknolojisi ile üretilen premium kalite ürünler. Her detayda mükemmellik."
+        },
+        "section": "homepage",
+        "updatedAt": "2026-04-03T22:38:43.709Z"
+      },
+      {
+        "id": "cmnjhjgzg0007e9mgwb9dia26",
+        "key": "hero_title_gradient",
+        "value": {
+          "text": "Mükemmellik"
+        },
+        "section": "homepage",
+        "updatedAt": "2026-04-03T22:38:43.132Z"
+      },
+      {
+        "id": "cmnjhjgha0006e9mgju191cx8",
+        "key": "hero_title_line1",
+        "value": {
+          "text": "Her Katmanda"
+        },
+        "section": "homepage",
+        "updatedAt": "2026-04-03T22:38:42.478Z"
+      }
+    ],
+    "pages": [
+      {
+        "id": "cmnizk313000ke9bg6ww3052c",
+        "title": "Gizlilik Politikası",
+        "slug": "privacy",
+        "content": "<h1>Gizlilik Politikası</h1>\n<p><em>Son güncelleme: 03.04.2026</em></p>\n\n<h2>1. Giriş</h2>\n<p>BS3DCrafts olarak gizliliğinize önem veriyoruz. Bu politika, kişisel verilerinizin nasıl toplandığını, kullanıldığını ve korunduğunu açıklar.</p>\n\n<h2>2. Toplanan Bilgiler</h2>\n<p>Aşağıdaki bilgileri toplayabiliriz:</p>\n<ul>\n<li><strong>Kimlik Bilgileri:</strong> Ad, soyad, e-posta, telefon</li>\n<li><strong>Adres Bilgileri:</strong> Teslimat ve fatura adresi</li>\n<li><strong>Ödeme Bilgileri:</strong> Kredi kartı bilgileri (Stripe üzerinden güvenli işlenir)</li>\n<li><strong>Sipariş Bilgileri:</strong> Satın alınan ürünler, sipariş geçmişi</li>\n<li><strong>Teknik Bilgiler:</strong> IP adresi, tarayıcı türü, çerezler</li>\n</ul>\n\n<h2>3. Bilgilerin Kullanımı</h2>\n<p>Topladığımız bilgileri şu amaçlarla kullanırız:</p>\n<ul>\n<li>Siparişleri işlemek ve teslimat yapmak</li>\n<li>Müşteri desteği sağlamak</li>\n<li>Ödeme işlemlerini gerçekleştirmek</li>\n<li>Site deneyimini iyileştirmek</li>\n<li>Yasal yükümlülükleri yerine getirmek</li>\n<li>Pazarlama iletişimi (onay vermeniz halinde)</li>\n</ul>\n\n<h2>4. Bilgi Paylaşımı</h2>\n<p>Kişisel bilgilerinizi üçüncü taraflarla paylaşmayız, ancak şu durumlar istisnadır:</p>\n<ul>\n<li><strong>Ödeme İşlemcisi:</strong> Stripe (güvenli ödeme için)</li>\n<li><strong>Kargo Firması:</strong> Teslimat için gerekli bilgiler</li>\n<li><strong>Yasal Zorunluluk:</strong> Mahkeme kararı veya yasal talep</li>\n</ul>\n\n<h2>5. Çerezler (Cookies)</h2>\n<p>Sitemiz, kullanıcı deneyimini iyileştirmek için çerezler kullanır. Çerezleri tarayıcı ayarlarından yönetebilirsiniz.</p>\n\n<h2>6. Veri Güvenliği</h2>\n<p>Verilerinizi korumak için:</p>\n<ul>\n<li>SSL şifreleme kullanıyoruz</li>\n<li>Güvenli sunucularda saklıyoruz</li>\n<li>Erişimi sınırlıyoruz</li>\n<li>Düzenli güvenlik güncellemeleri yapıyoruz</li>\n</ul>\n\n<h2>7. Haklarınız</h2>\n<p>KVKK kapsamında aşağıdaki haklara sahipsiniz:</p>\n<ul>\n<li>Verilerinize erişim talep etme</li>\n<li>Verilerin düzeltilmesini isteme</li>\n<li>Verilerin silinmesini talep etme</li>\n<li>Pazarlama iletişiminden çıkma</li>\n</ul>\n\n<h2>8. Çocukların Gizliliği</h2>\n<p>Sitemiz 18 yaş altı kullanıcılara yönelik değildir. Bilerek çocuklardan veri toplamıyoruz.</p>\n\n<h2>9. Değişiklikler</h2>\n<p>Bu politikayı zaman zaman güncelleyebiliriz. Değişiklikler bu sayfada yayınlanacaktır.</p>\n\n<h2>10. İletişim</h2>\n<p>Gizlilik ile ilgili sorularınız için:</p>\n<ul>\n<li>E-posta: bs3dcrafts.co@outlook.com</li>\n<li>Telefon: +90 546 451 95 97</li>\n<li>Adres: Karşıyaka, İzmir, Türkiye</li>\n</ul>",
+        "metaTitle": "Gizlilik Politikası - BS3DCrafts",
+        "metaDescription": "BS3DCrafts gizlilik politikası. Kişisel verilerinizin nasıl toplandığı, kullanıldığı ve korunduğu hakkında bilgi.",
+        "keywords": "gizlilik politikası, kvkk, kişisel veriler, privacy policy",
+        "status": "published",
+        "createdAt": "2026-04-03T14:15:18.616Z",
+        "updatedAt": "2026-04-03T14:15:18.616Z"
+      },
+      {
+        "id": "cmnizk2tw000je9bgj21s54zg",
+        "title": "Kullanım Koşulları",
+        "slug": "terms",
+        "content": "<h1>Kullanım Koşulları</h1>\n<p><em>Son güncelleme: 03.04.2026</em></p>\n\n<h2>1. Genel Hükümler</h2>\n<p>Bu web sitesini (bs3dcrafts.com) kullanarak aşağıdaki kullanım koşullarını kabul etmiş sayılırsınız. Koşulları kabul etmiyorsanız lütfen siteyi kullanmayınız.</p>\n\n<h2>2. Hizmet Kapsamı</h2>\n<p>BS3DCrafts, 3D baskı hizmetleri ve ürün satışı yapmaktadır. Ürün açıklamaları, fiyatlar ve teslimat süreleri değişiklik gösterebilir.</p>\n\n<h2>3. Sipariş ve Ödeme</h2>\n<ul>\n<li>Tüm siparişler onay sonrası kesinleşir</li>\n<li>Ödeme işlemleri güvenli Stripe altyapısı üzerinden yapılır</li>\n<li>Fiyatlar TL olarak belirtilmiştir ve KDV dahildir</li>\n<li>Stok durumuna göre sipariş iptal edilebilir</li>\n</ul>\n\n<h2>4. Teslimat</h2>\n<ul>\n<li>Teslimat süreleri tahminidir ve garanti edilmez</li>\n<li>Kargo ücreti sepet toplamına eklenir</li>\n<li>Teslimat adresi değişikliği kargo çıkışından önce yapılmalıdır</li>\n</ul>\n\n<h2>5. İade ve İptal</h2>\n<ul>\n<li>Üretim hatası veya hasarlı ürünlerde 14 gün içinde iade hakkı vardır</li>\n<li>Özel tasarım ürünlerde iade kabul edilmez</li>\n<li>İade kargo ücreti müşteriye aittir (hatalı ürün hariç)</li>\n</ul>\n\n<h2>6. Fikri Mülkiyet</h2>\n<p>Site içeriği, tasarımlar ve görseller BS3DCrafts'a aittir. İzinsiz kullanım yasaktır. Müşteri tarafından sağlanan tasarımların telif hakkı müşteriye aittir.</p>\n\n<h2>7. Sorumluluk Sınırlaması</h2>\n<p>BS3DCrafts, ürünlerin kullanımından kaynaklanan dolaylı zararlardan sorumlu değildir. Ürünler yalnızca belirtilen amaçlar için kullanılmalıdır.</p>\n\n<h2>8. Gizlilik</h2>\n<p>Kişisel verileriniz Gizlilik Politikamız kapsamında işlenir ve korunur.</p>\n\n<h2>9. Değişiklikler</h2>\n<p>BS3DCrafts bu koşulları önceden haber vermeksizin değiştirme hakkını saklı tutar.</p>\n\n<h2>10. İletişim</h2>\n<p>Sorularınız için: bs3dcrafts.co@outlook.com</p>",
+        "metaTitle": "Kullanım Koşulları - BS3DCrafts",
+        "metaDescription": "BS3DCrafts web sitesi kullanım koşulları, sipariş, teslimat, iade ve gizlilik politikaları.",
+        "keywords": "kullanım koşulları, şartlar, terms of service",
+        "status": "published",
+        "createdAt": "2026-04-03T14:15:18.357Z",
+        "updatedAt": "2026-04-03T14:15:18.357Z"
+      },
+      {
+        "id": "cmnizk2mg000ie9bgq8px4g9y",
+        "title": "Sıkça Sorulan Sorular",
+        "slug": "faq",
+        "content": "<h1>Sıkça Sorulan Sorular</h1>\n\n<h2>3D baskı nedir?</h2>\n<p>3D baskı, dijital bir tasarımdan katman katman malzeme ekleyerek üç boyutlu nesneler oluşturma teknolojisidir. PLA, PETG, ABS gibi plastik filamentler kullanılarak çeşitli ürünler üretilebilir.</p>\n\n<h2>Hangi malzemeleri kullanıyorsunuz?</h2>\n<p>Başlıca kullandığımız malzemeler:</p>\n<ul>\n<li><strong>PLA:</strong> Çevre dostu, kolay işlenebilir, dekoratif ürünler için ideal</li>\n<li><strong>PETG:</strong> Dayanıklı, esnek, fonksiyonel parçalar için uygun</li>\n<li><strong>ABS:</strong> Yüksek sıcaklığa dayanıklı, mekanik parçalar için tercih edilir</li>\n</ul>\n\n<h2>Sipariş süreci nasıl işler?</h2>\n<ol>\n<li>Ürünü sepete ekleyin veya özel tasarım için iletişime geçin</li>\n<li>Ödeme işlemini tamamlayın</li>\n<li>Ürününüz üretilir (tahmini süre ürün sayfasında belirtilir)</li>\n<li>Kargo ile adresinize gönderilir</li>\n</ol>\n\n<h2>Teslimat ne kadar sürer?</h2>\n<p>Üretim süresi ürüne göre değişir (genellikle 1-12 saat). Üretim tamamlandıktan sonra kargo ile 2-5 iş günü içinde adresinize ulaşır.</p>\n\n<h2>Özel tasarım yaptırabilir miyim?</h2>\n<p>Evet! Kendi tasarımlarınızı STL dosyası olarak gönderebilir veya fikrinizi paylaşarak bizden tasarım hizmeti alabilirsiniz. İletişim için WhatsApp veya e-posta kullanabilirsiniz.</p>\n\n<h2>İade ve değişim politikanız nedir?</h2>\n<p>Üretim hatası veya hasarlı ürün durumunda 14 gün içinde iade veya değişim yapılabilir. Özel tasarım ürünlerde iade kabul edilmemektedir.</p>\n\n<h2>Toplu sipariş verebilir miyim?</h2>\n<p>Evet, toplu siparişler için özel fiyat teklifi sunuyoruz. Lütfen bizimle iletişime geçin.</p>\n\n<h2>Ödeme yöntemleri nelerdir?</h2>\n<p>Kredi kartı, banka kartı ve havale ile ödeme kabul edilmektedir. Güvenli ödeme için Stripe altyapısını kullanıyoruz.</p>",
+        "metaTitle": "Sıkça Sorulan Sorular - BS3DCrafts",
+        "metaDescription": "3D baskı hizmetlerimiz hakkında sıkça sorulan sorular ve cevapları. Malzemeler, teslimat, özel tasarım ve daha fazlası.",
+        "keywords": "sss, faq, 3d baskı soruları, teslimat, özel tasarım",
+        "status": "published",
+        "createdAt": "2026-04-03T14:15:18.089Z",
+        "updatedAt": "2026-04-03T14:15:18.089Z"
+      },
+      {
+        "id": "cmnizk2eu000he9bgix2u40em",
+        "title": "Hakkımızda",
+        "slug": "about",
+        "content": "<h1>BS3DCrafts Hakkında</h1>\n<p>BS3DCrafts, İzmir merkezli profesyonel 3D baskı hizmetleri sunan bir atölyedir. 2024 yılında kurulan firmamız, yüksek kaliteli 3D baskı teknolojisi ile müşterilerimize özel tasarım ve üretim hizmetleri sunmaktadır.</p>\n\n<h2>Misyonumuz</h2>\n<p>3D baskı teknolojisini herkes için erişilebilir kılmak ve yaratıcı projelerinizi hayata geçirmenize yardımcı olmak. Her katmanda hassasiyet ve kalite odaklı çalışıyoruz.</p>\n\n<h2>Neden BS3DCrafts?</h2>\n<ul>\n<li><strong>Yüksek Kalite:</strong> PLA, PETG ve ABS gibi premium malzemelerle üretim</li>\n<li><strong>Hızlı Teslimat:</strong> Siparişleriniz en kısa sürede hazırlanır</li>\n<li><strong>Özel Tasarım:</strong> Kendi tasarımlarınızı hayata geçirebilirsiniz</li>\n<li><strong>Uygun Fiyat:</strong> Rekabetçi fiyatlarla kaliteli hizmet</li>\n<li><strong>Müşteri Memnuniyeti:</strong> 7/24 destek ve danışmanlık</li>\n</ul>\n\n<h2>İletişim</h2>\n<p>Sorularınız için bize ulaşabilirsiniz:</p>\n<ul>\n<li>E-posta: bs3dcrafts.co@outlook.com</li>\n<li>Telefon: +90 546 451 95 97</li>\n<li>WhatsApp: +90 546 451 95 97</li>\n<li>Adres: Karşıyaka, İzmir, Türkiye</li>\n</ul>",
+        "metaTitle": "Hakkımızda - BS3DCrafts",
+        "metaDescription": "BS3DCrafts, İzmir merkezli profesyonel 3D baskı hizmetleri sunan bir atölyedir. Yüksek kaliteli PLA, PETG ve ABS baskılar.",
+        "keywords": "3d printing izmir, 3d baskı hizmeti, özel tasarım, hakkımızda",
+        "status": "published",
+        "createdAt": "2026-04-03T14:15:17.815Z",
+        "updatedAt": "2026-04-03T14:15:17.815Z"
+      }
+    ],
+    "products": [
+      {
+        "id": "test-product-2",
+        "name": "Test Ürün 2",
+        "slug": "test-urun-2",
+        "description": "PayTR entegrasyonu için test ürünü 2",
+        "price": 50,
+        "discountedPrice": null,
+        "stock": 5,
+        "category": "test",
+        "material": "PETG",
+        "printTimeEstimate": "1 saat",
+        "weight": 0.05,
+        "featured": false,
+        "status": "published",
+        "createdAt": "2026-04-06T22:35:03.940Z",
+        "updatedAt": "2026-04-06T22:35:03.940Z",
+        "media": []
+      },
+      {
+        "id": "test-product-1",
+        "name": "Test Ürün 1",
+        "slug": "test-urun-1",
+        "description": "PayTR entegrasyonu için test ürünü 1",
+        "price": 100,
+        "discountedPrice": null,
+        "stock": 10,
+        "category": "test",
+        "material": "PLA",
+        "printTimeEstimate": "2 saat",
+        "weight": 0.1,
+        "featured": false,
+        "status": "published",
+        "createdAt": "2026-04-06T22:35:03.325Z",
+        "updatedAt": "2026-04-06T22:35:03.325Z",
+        "media": []
+      },
+      {
+        "id": "cmnc8snil0000kz04qli27z6i",
+        "name": "test",
+        "slug": "test",
+        "description": "test",
+        "price": 300,
+        "discountedPrice": 280,
+        "stock": 15,
+        "category": "Dekorasyon",
+        "material": "PLA",
+        "printTimeEstimate": "10",
+        "weight": 300,
+        "featured": false,
+        "status": "published",
+        "createdAt": "2026-03-29T20:59:31.724Z",
+        "updatedAt": "2026-03-29T20:59:31.724Z",
+        "media": []
+      },
+      {
+        "id": "cmnayyxnl0000e9povg6zwe1q",
+        "name": "test antik yunan",
+        "slug": "test-antik-yunan",
+        "description": "test denemesi",
+        "price": 535,
+        "discountedPrice": null,
+        "stock": 15,
+        "category": "Dekorasyon",
+        "material": "PLA",
+        "printTimeEstimate": "11",
+        "weight": 150,
+        "featured": false,
+        "status": "published",
+        "createdAt": "2026-03-28T23:36:42.393Z",
+        "updatedAt": "2026-03-29T20:34:01.000Z",
+        "media": [
+          {
+            "id": "cmnayyxnm0001e9po3jq1290c",
+            "productId": "cmnayyxnl0000e9povg6zwe1q",
+            "type": "image",
+            "url": "https://jiutbqwwjkzjwzhxmgnw.supabase.co/storage/v1/object/public/products/products/1774740917141-aeczis.png",
+            "order": 0,
+            "createdAt": "2026-03-28T23:36:42.393Z"
+          },
+          {
+            "id": "cmnayyxnm0002e9pojv0wzvbq",
+            "productId": "cmnayyxnl0000e9povg6zwe1q",
+            "type": "image",
+            "url": "https://jiutbqwwjkzjwzhxmgnw.supabase.co/storage/v1/object/public/products/products/1774740919103-5isdrl.png",
+            "order": 1,
+            "createdAt": "2026-03-28T23:36:42.393Z"
+          },
+          {
+            "id": "cmnayyxnm0003e9ponridfnqj",
+            "productId": "cmnayyxnl0000e9povg6zwe1q",
+            "type": "image",
+            "url": "https://jiutbqwwjkzjwzhxmgnw.supabase.co/storage/v1/object/public/products/products/1774740920641-46tuj.png",
+            "order": 2,
+            "createdAt": "2026-03-28T23:36:42.393Z"
+          }
+        ]
+      }
+    ],
+    "settings": [
+      {
+        "id": "cmnizk1v0000fe9bgnmuphbgv",
+        "key": "analytics.google_id",
+        "value": "",
+        "category": "analytics",
+        "updatedAt": "2026-04-03T14:15:17.100Z"
+      },
+      {
+        "id": "cmnizk22z000ge9bg0az08868",
+        "key": "analytics.facebook_pixel",
+        "value": "",
+        "category": "analytics",
+        "updatedAt": "2026-04-03T14:15:17.388Z"
+      },
+      {
+        "id": "cmnizjzm30004e9bg7qlf9nog",
+        "key": "contact.email",
+        "value": "bs3dcrafts.co@outlook.com",
+        "category": "contact",
+        "updatedAt": "2026-04-03T22:32:20.068Z"
+      },
+      {
+        "id": "cmnizjztj0005e9bgewykazks",
+        "key": "contact.phone",
+        "value": "+90 546 451 95 97",
+        "category": "contact",
+        "updatedAt": "2026-04-03T22:32:23.548Z"
+      },
+      {
+        "id": "cmnizk00r0006e9bgl89gihj2",
+        "key": "contact.whatsapp",
+        "value": "905464519597",
+        "category": "contact",
+        "updatedAt": "2026-04-03T22:32:25.332Z"
+      },
+      {
+        "id": "cmnizk0820007e9bgxu3ucc1y",
+        "key": "contact.address",
+        "value": "Karşıyaka, İzmir, Türkiye",
+        "category": "contact",
+        "updatedAt": "2026-04-03T22:32:25.654Z"
+      },
+      {
+        "id": "cmnizk190000ce9bgrz8ocfzf",
+        "key": "features.newsletter",
+        "value": "true",
+        "category": "features",
+        "updatedAt": "2026-04-03T14:15:16.308Z"
+      },
+      {
+        "id": "cmnizk1gc000de9bgzwivyt5o",
+        "key": "features.whatsapp_button",
+        "value": "true",
+        "category": "features",
+        "updatedAt": "2026-04-03T14:15:16.573Z"
+      },
+      {
+        "id": "cmnizk1no000ee9bgtpm9ti0k",
+        "key": "features.testimonials",
+        "value": "true",
+        "category": "features",
+        "updatedAt": "2026-04-03T14:15:16.837Z"
+      },
+      {
+        "id": "cmnizjys10000e9bg3b9n59ur",
+        "key": "site.title",
+        "value": "BS3DCrafts",
+        "category": "general",
+        "updatedAt": "2026-04-03T14:15:13.105Z"
+      },
+      {
+        "id": "cmnizjyzo0001e9bgj64ra4pz",
+        "key": "site.tagline",
+        "value": "Precision in Every Layer",
+        "category": "general",
+        "updatedAt": "2026-04-03T14:15:13.380Z"
+      },
+      {
+        "id": "cmnizjz780002e9bgh4qi96l9",
+        "key": "site.description",
+        "value": "Professional 3D printing services and custom designs in İzmir, Turkey. High-quality PLA, PETG, and ABS prints for your creative projects.",
+        "category": "general",
+        "updatedAt": "2026-04-03T14:15:13.652Z"
+      },
+      {
+        "id": "cmnizjzev0003e9bgtlcr9t9p",
+        "key": "site.keywords",
+        "value": "3d printing, 3d baskı, izmir, custom design, özel tasarım, pla, petg, abs",
+        "category": "general",
+        "updatedAt": "2026-04-03T14:15:13.927Z"
+      },
+      {
+        "id": "cmnizk0fr0008e9bgsbksn8w5",
+        "key": "social.instagram",
+        "value": "https://instagram.com/bs3dcrafts",
+        "category": "social",
+        "updatedAt": "2026-04-03T14:15:15.256Z"
+      },
+      {
+        "id": "cmnizk0mz0009e9bgxk2b5pms",
+        "key": "social.twitter",
+        "value": "",
+        "category": "social",
+        "updatedAt": "2026-04-03T14:15:15.516Z"
+      },
+      {
+        "id": "cmnizk0ub000ae9bgg8oktaju",
+        "key": "social.facebook",
+        "value": "",
+        "category": "social",
+        "updatedAt": "2026-04-03T14:15:15.780Z"
+      },
+      {
+        "id": "cmnizk11o000be9bgxtskoy27",
+        "key": "social.linkedin",
+        "value": "",
+        "category": "social",
+        "updatedAt": "2026-04-03T14:15:16.044Z"
+      }
+    ],
+    "navigation": [
+      {
+        "id": "cmnizk4a3000qe9bgvpa5ha5j",
+        "type": "footer",
+        "label": "Hakkımızda",
+        "url": "/about",
+        "parentId": null,
+        "order": 1,
+        "createdAt": "2026-04-03T14:15:20.235Z"
+      },
+      {
+        "id": "cmnizk4hc000re9bg73d5a2t1",
+        "type": "footer",
+        "label": "Sıkça Sorulan Sorular",
+        "url": "/faq",
+        "parentId": null,
+        "order": 2,
+        "createdAt": "2026-04-03T14:15:20.496Z"
+      },
+      {
+        "id": "cmnizk4oi000se9bg1c1i0siz",
+        "type": "footer",
+        "label": "Kullanım Koşulları",
+        "url": "/terms",
+        "parentId": null,
+        "order": 3,
+        "createdAt": "2026-04-03T14:15:20.755Z"
+      },
+      {
+        "id": "cmnizk4w8000te9bgmyp16rwv",
+        "type": "footer",
+        "label": "Gizlilik Politikası",
+        "url": "/privacy",
+        "parentId": null,
+        "order": 4,
+        "createdAt": "2026-04-03T14:15:21.032Z"
+      },
+      {
+        "id": "cmnizk3ui000oe9bgaodnjz9p",
+        "type": "footer",
+        "label": "SSS",
+        "url": "/faq",
+        "parentId": null,
+        "order": 4,
+        "createdAt": "2026-04-03T14:15:19.675Z"
+      },
+      {
+        "id": "cmnizk41w000pe9bgfhe9aozy",
+        "type": "footer",
+        "label": "İletişim",
+        "url": "/contact",
+        "parentId": null,
+        "order": 5,
+        "createdAt": "2026-04-03T14:15:19.941Z"
+      },
+      {
+        "id": "cmnizk53k000ue9bgvw3gx5rx",
+        "type": "footer",
+        "label": "İletişim",
+        "url": "/contact",
+        "parentId": null,
+        "order": 5,
+        "createdAt": "2026-04-03T14:15:21.296Z"
+      }
+    ],
+    "media": [
+      {
+        "id": "cmnnr3ed80002lb04vcfhm67m",
+        "filename": "balpetegimasalambasi3.jpg",
+        "url": "https://jiutbqwwjkzjwzhxmgnw.supabase.co/storage/v1/object/public/media/balpetegimasalambasi3-large-1775513833544.webp",
+        "type": "image",
+        "size": 3764786,
+        "dimensions": "4032x3024",
+        "usageCount": 0,
+        "uploadedAt": "2026-04-06T22:17:14.108Z"
+      },
+      {
+        "id": "cmnnr3aq50000lb04ceruy3c4",
+        "filename": "balpetegimasalambasi2.jpg",
+        "url": "https://jiutbqwwjkzjwzhxmgnw.supabase.co/storage/v1/object/public/media/balpetegimasalambasi2-large-1775513828697.webp",
+        "type": "image",
+        "size": 4267274,
+        "dimensions": "4032x3024",
+        "usageCount": 0,
+        "uploadedAt": "2026-04-06T22:17:09.296Z"
+      }
+    ]
+  }
+}

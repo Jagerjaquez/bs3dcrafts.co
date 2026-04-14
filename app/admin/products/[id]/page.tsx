@@ -1,16 +1,18 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, use, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ArrowLeft, Save, Trash2, Upload, X } from 'lucide-react'
+import { ArrowLeft, Save, Trash2, Upload, X, AlertTriangle, GripVertical } from 'lucide-react'
 import Image from 'next/image'
 import { adminMultipartHeaders } from '@/lib/admin-client'
 import { MediaSelector } from '@/components/media-selector'
 import Link from 'next/link'
 import { adminJsonHeaders } from '@/lib/admin-client'
+import { useToast } from '@/contexts/toast-context'
+import { useDropzone } from 'react-dropzone'
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -20,6 +22,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [uploadingImage, setUploadingImage] = useState(false)
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
   const [images, setImages] = useState<string[]>([])
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
+  const { showSuccess, showError } = useToast()
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -68,7 +72,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         })
       } else {
         const errorData = await response.json()
-        alert('Ürün yüklenirken hata oluştu: ' + (errorData.error || 'Bilinmeyen hata'))
+        showError('Ürün yüklenemedi', errorData.error || 'Bilinmeyen hata oluştu')
       }
     } catch (error) {
       console.error('Error:', error)
@@ -97,48 +101,95 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       })
 
       if (response.ok) {
+        showSuccess('Ürün güncellendi', 'Değişiklikler başarıyla kaydedildi')
         router.push('/admin/products')
         router.refresh()
       } else {
         const errorData = await response.json()
-        alert('Ürün güncellenirken hata oluştu: ' + (errorData.error || 'Bilinmeyen hata'))
+        showError('Ürün güncellenemedi', errorData.error || 'Bilinmeyen hata oluştu')
       }
     } catch (error) {
       console.error('Error:', error)
-      alert('Bir hata oluştu')
+      showError('Bağlantı hatası', 'Sunucuya bağlanılamadı')
     } finally {
       setSaving(false)
     }
   }
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
+  const handleImageUpload = async (files: File[]) => {
     if (!files?.length) return
     setUploadingImage(true)
+    
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
+        const fileId = `${file.name}-${Date.now()}`
+        setUploadProgress(prev => ({ ...prev, [fileId]: 0 }))
+
         const fd = new FormData()
         fd.append('file', file)
+        
         const response = await fetch('/api/upload', {
           method: 'POST',
           credentials: 'include',
           headers: adminMultipartHeaders(),
           body: fd,
         })
+        
         if (response.ok) {
           const data = await response.json()
           setImages((prev) => [...prev, data.url])
+          setUploadProgress(prev => ({ ...prev, [fileId]: 100 }))
+        } else {
+          const errorData = await response.json()
+          showError(`${file.name} yüklenemedi`, errorData.error || 'Bilinmeyen hata oluştu')
         }
+
+        // Remove progress after a delay
+        setTimeout(() => {
+          setUploadProgress(prev => {
+            const newProgress = { ...prev }
+            delete newProgress[fileId]
+            return newProgress
+          })
+        }, 2000)
       }
     } finally {
       setUploadingImage(false)
-      e.target.value = ''
     }
+  }
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    handleImageUpload(acceptedFiles)
+  }, [])
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/*': ['.jpeg', '.jpg', '.png', '.webp', '.gif']
+    },
+    multiple: true,
+    maxSize: 5 * 1024 * 1024, // 5MB
+  })
+
+  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files?.length) return
+    await handleImageUpload(Array.from(files))
+    e.target.value = ''
   }
 
   const removeImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const moveImage = (fromIndex: number, toIndex: number) => {
+    setImages(prev => {
+      const newImages = [...prev]
+      const [movedImage] = newImages.splice(fromIndex, 1)
+      newImages.splice(toIndex, 0, movedImage)
+      return newImages
+    })
   }
 
   const handleDelete = async () => {
@@ -152,15 +203,16 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       })
 
       if (response.ok) {
+        showSuccess('Ürün silindi', 'Ürün başarıyla kaldırıldı')
         router.push('/admin/products')
         router.refresh()
       } else {
         const errorData = await response.json()
-        alert('Ürün silinirken hata oluştu: ' + (errorData.error || 'Bilinmeyen hata'))
+        showError('Ürün silinemedi', errorData.error || 'Bilinmeyen hata oluştu')
       }
     } catch (error) {
       console.error('Error:', error)
-      alert('Bir hata oluştu')
+      showError('Bağlantı hatası', 'Sunucuya bağlanılamadı')
     }
   }
 
@@ -193,6 +245,28 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       <form onSubmit={handleSubmit} className="glass border border-primary/20 rounded-lg p-8 space-y-6">
         <div className="space-y-3 md:col-span-2">
           <label className="text-sm font-medium text-white">Ürün görselleri</label>
+          
+          {/* Drag-Drop Upload Zone */}
+          <div
+            {...getRootProps()}
+            className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+              isDragActive
+                ? 'border-primary bg-primary/10'
+                : 'border-primary/20 hover:border-primary/40 hover:bg-primary/5'
+            }`}
+          >
+            <input {...getInputProps()} />
+            <Upload className="h-8 w-8 text-gray-500 mx-auto mb-2" />
+            {isDragActive ? (
+              <p className="text-white text-sm">Fotoğrafları buraya bırakın...</p>
+            ) : (
+              <div>
+                <p className="text-white text-sm mb-1">Fotoğrafları buraya sürükleyin veya tıklayın</p>
+                <p className="text-xs text-gray-400">JPEG, PNG, WebP, GIF - Maksimum 5MB</p>
+              </div>
+            )}
+          </div>
+
           <div className="flex flex-wrap items-center gap-3">
             <label className="cursor-pointer">
               <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary/20 border border-primary/40 rounded-lg text-sm text-white">
@@ -205,23 +279,49 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 multiple
                 className="hidden"
                 disabled={uploadingImage}
-                onChange={handleImageUpload}
+                onChange={handleFileInputChange}
               />
             </label>
             <Button type="button" variant="outline" size="sm" onClick={() => setMediaPickerOpen(true)}>
               Kütüphaneden seç
             </Button>
           </div>
+
+          {/* Upload Progress */}
+          {Object.keys(uploadProgress).length > 0 && (
+            <div className="space-y-2">
+              {Object.entries(uploadProgress).map(([fileId, progress]) => (
+                <div key={fileId} className="flex items-center gap-2">
+                  <div className="flex-1 bg-gray-700 rounded-full h-2">
+                    <div
+                      className="bg-primary h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-gray-400">{progress}%</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           <MediaSelector
             open={mediaPickerOpen}
             onClose={() => setMediaPickerOpen(false)}
             onPick={(url) => setImages((prev) => [...prev, url])}
           />
+          
           {images.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {images.map((url, index) => (
                 <div key={`${url}-${index}`} className="relative group aspect-square rounded-lg overflow-hidden border border-primary/20">
                   <Image src={url} alt="" fill className="object-cover" unoptimized={url.startsWith('http')} />
+                  
+                  {/* Drag Handle */}
+                  <div className="absolute top-1 left-1 p-1 bg-black/50 rounded cursor-move opacity-0 group-hover:opacity-100 transition-opacity">
+                    <GripVertical className="h-3 w-3 text-white" />
+                  </div>
+                  
+                  {/* Delete Button */}
                   <button
                     type="button"
                     onClick={() => removeImage(index)}
@@ -229,6 +329,37 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   >
                     <X className="h-3 w-3 text-white" />
                   </button>
+                  
+                  {/* Main Image Indicator */}
+                  {index === 0 && (
+                    <div className="absolute bottom-1 left-1 px-2 py-1 bg-primary/80 rounded text-xs text-white">
+                      Ana
+                    </div>
+                  )}
+                  
+                  {/* Reorder Buttons */}
+                  <div className="absolute bottom-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {index > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => moveImage(index, index - 1)}
+                        className="p-1 bg-black/50 rounded text-xs text-white hover:bg-black/70"
+                        title="Sola taşı"
+                      >
+                        ←
+                      </button>
+                    )}
+                    {index < images.length - 1 && (
+                      <button
+                        type="button"
+                        onClick={() => moveImage(index, index + 1)}
+                        className="p-1 bg-black/50 rounded text-xs text-white hover:bg-black/70"
+                        title="Sağa taşı"
+                      >
+                        →
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -343,6 +474,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
               placeholder="15"
             />
+            {parseInt(formData.stock) > 0 && parseInt(formData.stock) <= 5 && (
+              <div className="flex items-center gap-2 text-orange-500 text-sm">
+                <AlertTriangle className="h-4 w-4" />
+                <span>Düşük stok uyarısı! Stok 5 ve altında.</span>
+              </div>
+            )}
           </div>
 
           {/* Ağırlık */}

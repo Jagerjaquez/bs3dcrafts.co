@@ -1,12 +1,12 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { formatPrice } from '@/lib/utils'
 import { Sparkles, ShoppingCart } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { Button } from './ui/button'
+import { LazyImage } from './ui/lazy-image'
 import { useState } from 'react'
 
 interface ProductCardProps {
@@ -49,11 +49,14 @@ export function ProductCard({ id, name, slug, price, discountedPrice, image, cat
       >
         <Link href={`/products/${slug}`} className="flex gap-6 p-6">
           <div className="w-48 h-48 relative overflow-hidden rounded-xl flex-shrink-0 bg-muted/50">
-            <Image
+            <LazyImage
               src={image}
               alt={name}
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-700"
+              priority={false}
+              placeholder="blur"
+              sizes="(max-width: 768px) 100vw, 192px"
             />
             {hasDiscount && (
               <div className="absolute top-3 right-3 bg-gradient-to-r from-destructive to-destructive/80 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 animate-pulse-glow">
@@ -108,11 +111,14 @@ export function ProductCard({ id, name, slug, price, discountedPrice, image, cat
     >
       <Link href={`/products/${slug}`}>
         <div className="aspect-square relative overflow-hidden bg-muted/50">
-          <Image
+          <LazyImage
             src={image}
             alt={name}
             fill
             className="object-cover group-hover:scale-110 transition-transform duration-700"
+            priority={false}
+            placeholder="blur"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           {hasDiscount && (
             <div className="absolute top-3 right-3 bg-gradient-to-r from-destructive to-destructive/80 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 animate-pulse-glow">

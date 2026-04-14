@@ -5,6 +5,12 @@
  */
 
 import { prisma } from './prisma'
+import { 
+  logAPIError, 
+  logAuthenticationFailure, 
+  logSecurityEvent, 
+  logCMSOperation 
+} from './monitoring'
 
 export type AuditAction =
   | 'admin_login'
@@ -71,6 +77,47 @@ export async function logAudit(entry: Omit<AuditLogEntry, 'timestamp'>): Promise
     details: logEntry.details,
   })
   
+  // Send to monitoring system
+  if (!entry.success) {
+    // Log authentication failures
+    if (entry.action === 'admin_login_failed') {
+      logAuthenticationFailure(entry.errorMessage || 'Login failed', {
+        ipAddress: entry.ipAddress,
+        userAgent: entry.userAgent,
+        attemptedUsername: entry.userId,
+      })
+    }
+    
+    // Log other failures as API errors
+    else {
+      logAPIError(new Error(entry.errorMessage || 'Operation failed'), {
+        userId: entry.userId,
+        action: entry.action,
+        ipAddress: entry.ipAddress,
+        userAgent: entry.userAgent,
+        additionalData: entry.details
+      })
+    }
+  }
+  
+  // Log CMS operations
+  if (entry.action.includes('content') || entry.action.includes('page') || 
+      entry.action.includes('media') || entry.action.includes('navigation')) {
+    const operation = entry.action.includes('created') ? 'create' :
+                     entry.action.includes('updated') ? 'update' : 'delete'
+    const resource = entry.action.split('_')[0]
+    
+    logCMSOperation(operation, resource, {
+      adminId: entry.userId,
+      resourceId: entry.details?.contentId || entry.details?.pageId || 
+                  entry.details?.mediaId || entry.details?.navigationId,
+      changes: entry.details,
+      ipAddress: entry.ipAddress,
+      success: entry.success,
+      error: entry.errorMessage
+    })
+  }
+  
   // Persist to database asynchronously (non-blocking)
   try {
     // Determine resource type from action
@@ -104,9 +151,18 @@ export async function logAudit(entry: Omit<AuditLogEntry, 'timestamp'>): Promise
       },
     }).catch((err) => {
       console.error('Failed to persist audit log to database:', err)
+      logAPIError(err, {
+        action: 'audit_log_persistence',
+        resource: 'database',
+        additionalData: { originalAction: entry.action }
+      })
     })
   } catch (error) {
     console.error('Audit log persistence error:', error)
+    logAPIError(error as Error, {
+      action: 'audit_log_persistence',
+      resource: 'database'
+    })
   }
 }
 

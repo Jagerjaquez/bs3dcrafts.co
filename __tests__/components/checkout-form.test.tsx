@@ -197,7 +197,7 @@ describe('CheckoutForm Component - Unit Tests', () => {
       fireEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith('/api/checkout/session', {
+        expect(global.fetch).toHaveBeenCalledWith('/api/checkout/paytr', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

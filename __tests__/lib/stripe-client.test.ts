@@ -1,6 +1,6 @@
 import fc from 'fast-check'
 import Stripe from 'stripe'
-import { stripe } from '@/lib/stripe-client'
+import { getStripeClient } from '@/lib/stripe-client'
 
 // Mock environment variables for testing
 process.env.STRIPE_SECRET_KEY = 'sk_test_mock_key_for_testing'
@@ -8,6 +8,7 @@ process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = 'pk_test_mock_key_for_testing'
 
 describe('Stripe Client Initialization', () => {
   it('should initialize Stripe client with correct configuration', () => {
+    const stripe = getStripeClient()
     expect(stripe).toBeInstanceOf(Stripe)
     // Verify the client is properly initialized by checking it has the expected methods
     expect(typeof stripe.checkout.sessions.create).toBe('function')

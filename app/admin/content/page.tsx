@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { adminJsonHeaders } from '@/lib/admin-client'
+import { useToast } from '@/contexts/toast-context'
 
 const HERO_KEYS = [
   { key: 'hero_badge', label: 'Rozet metni' },
@@ -27,6 +28,7 @@ export default function AdminHomepageContentPage() {
   const [texts, setTexts] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
+  const { showSuccess, showError } = useToast()
 
   const load = async () => {
     setLoading(true)
@@ -57,10 +59,10 @@ export default function AdminHomepageContentPage() {
     })
     const d = await res.json().catch(() => ({}))
     if (!res.ok) {
-      alert((d as { error?: string }).error || 'Seed başarısız')
+      showError('Seed başarısız', (d as { error?: string }).error || 'Bilinmeyen hata oluştu')
       return
     }
-    alert(`Varsayılan alanlar: ${(d as { created?: number }).created ?? 0} yeni kayıt`)
+    showSuccess('Varsayılan alanlar oluşturuldu', `${(d as { created?: number }).created ?? 0} yeni kayıt eklendi`)
     load()
   }
 
@@ -86,13 +88,16 @@ export default function AdminHomepageContentPage() {
         })
         if (!create.ok) {
           const d = await create.json().catch(() => ({}))
-          alert((d as { error?: string }).error || 'Oluşturulamadı')
+          showError('Oluşturulamadı', (d as { error?: string }).error || 'Bilinmeyen hata oluştu')
           return
         }
+        showSuccess('İçerik oluşturuldu', 'Yeni içerik başarıyla oluşturuldu')
       } else if (!res.ok) {
         const d = await res.json().catch(() => ({}))
-        alert((d as { error?: string }).error || 'Kayıt başarısız')
+        showError('Kayıt başarısız', (d as { error?: string }).error || 'Bilinmeyen hata oluştu')
         return
+      } else {
+        showSuccess('Kaydedildi', 'İçerik başarıyla güncellendi')
       }
     } finally {
       setSaving(null)

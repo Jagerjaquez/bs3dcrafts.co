@@ -8,6 +8,7 @@ import { sendEmail, EMAIL_CONFIG } from './email-client'
 import { render } from '@react-email/components'
 import OrderConfirmationEmail from '@/emails/order-confirmation'
 import AdminOrderNotification from '@/emails/admin-order-notification'
+import OrderStatusUpdateEmail from '@/emails/order-status-update'
 
 interface OrderData {
   orderNumber: string
@@ -32,6 +33,20 @@ interface OrderData {
     postalCode: string
     country: string
   }
+}
+
+interface OrderStatusEmailData {
+  customerEmail: string
+  customerName: string
+  orderId: string
+  status: string
+  trackingNumber?: string
+  orderItems: Array<{
+    name: string
+    quantity: number
+    price: number
+  }>
+  totalAmount: number
 }
 
 /**
@@ -105,6 +120,55 @@ export async function sendAdminOrderNotification(orderData: OrderData) {
     return result
   } catch (error) {
     console.error('Error sending admin notification email:', error)
+    return { success: false, error }
+  }
+}
+
+/**
+ * Send order status update email to customer
+ */
+export async function sendOrderStatusEmail(data: OrderStatusEmailData) {
+  try {
+    // Get status display text in Turkish
+    const statusText = {
+      pending: 'Beklemede',
+      paid: 'Ödendi',
+      shipped: 'Kargoya Verildi',
+      completed: 'Tamamlandı',
+      cancelled: 'İptal Edildi'
+    }[data.status] || data.status
+
+    const emailHtml = await render(
+      OrderStatusUpdateEmail({
+        customerName: data.customerName,
+        orderId: data.orderId,
+        status: data.status,
+        statusText: statusText,
+        trackingNumber: data.trackingNumber,
+        items: data.orderItems,
+        totalAmount: data.totalAmount,
+      })
+    )
+
+    const subject = data.status === 'shipped' 
+      ? `📦 Siparişiniz Kargoya Verildi - ${data.orderId}`
+      : `📋 Sipariş Durumu Güncellendi - ${data.orderId}`
+
+    const result = await sendEmail({
+      to: data.customerEmail,
+      subject,
+      html: emailHtml,
+    })
+
+    if (result.success) {
+      console.log('Order status email sent to:', data.customerEmail)
+    } else {
+      console.error('Failed to send order status email:', result.error)
+    }
+
+    return result
+  } catch (error) {
+    console.error('Error sending order status email:', error)
     return { success: false, error }
   }
 }

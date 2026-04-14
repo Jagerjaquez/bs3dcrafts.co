@@ -11,7 +11,7 @@ import { requireAdminAuth } from '@/lib/admin-auth'
 import { requireCSRFToken } from '@/lib/csrf'
 import { PageSchema } from '@/lib/cms-validation'
 import { logAudit } from '@/lib/audit-log'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { sanitizeHTML } from '@/lib/sanitize'
 import { createPageRedirect } from '@/lib/redirects'
 
@@ -126,11 +126,16 @@ export async function PUT(
       details: { pageId: page.id, pageTitle: title },
     })
 
+    // Enhanced cache invalidation for performance optimization
     revalidatePath('/')
     revalidatePath(`/${currentPage.slug}`)
     revalidatePath(`/${slug}`)
     revalidatePath(`/sayfa/${currentPage.slug}`)
     revalidatePath(`/sayfa/${slug}`)
+    revalidatePath(`/api/content/pages/${currentPage.slug}`)
+    revalidatePath(`/api/content/pages/${slug}`)
+    revalidateTag('page-content', 'max')
+    revalidateTag('public-content', 'max')
 
     return NextResponse.json(page)
   } catch (error) {
@@ -183,9 +188,13 @@ export async function DELETE(
       details: { pageId: id, pageTitle: page.title },
     })
 
+    // Enhanced cache invalidation for performance optimization
     revalidatePath('/')
     revalidatePath(`/${page.slug}`)
     revalidatePath(`/sayfa/${page.slug}`)
+    revalidatePath(`/api/content/pages/${page.slug}`)
+    revalidateTag('page-content', 'max')
+    revalidateTag('public-content', 'max')
 
     return NextResponse.json({ message: 'Sayfa başarıyla silindi' })
   } catch (error) {

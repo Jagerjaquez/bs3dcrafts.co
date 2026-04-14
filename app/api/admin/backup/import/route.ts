@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
     })
 
     revalidatePath('/')
-    revalidateTag(CMS_CACHE_TAG, 'max')
+    revalidateTag('cms', 'max')
 
     return NextResponse.json({ success: true })
   } catch (error) {

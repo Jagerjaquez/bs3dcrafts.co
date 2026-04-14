@@ -4,7 +4,7 @@ import { requireAdminAuth } from '@/lib/admin-auth'
 import { requireCSRFToken } from '@/lib/csrf'
 import { NavigationSchema } from '@/lib/cms-validation'
 import { logAudit } from '@/lib/audit-log'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 export async function PUT(
   request: NextRequest,
@@ -62,7 +62,12 @@ export async function PUT(
       details: { navigationId: item.id, label },
     })
 
+    // Enhanced cache invalidation for performance optimization
     revalidatePath('/')
+    revalidatePath('/api/content/navigation')
+    revalidateTag('navigation-content', 'max')
+    revalidateTag('public-content', 'max')
+    
     return NextResponse.json(item)
   } catch (error) {
     console.error('Navigation update error:', error)
@@ -113,8 +118,11 @@ export async function DELETE(
       },
     })
 
-    // Invalidate cache to ensure navigation changes are reflected
+    // Enhanced cache invalidation for performance optimization
     revalidatePath('/')
+    revalidatePath('/api/content/navigation')
+    revalidateTag('navigation-content', 'max')
+    revalidateTag('public-content', 'max')
     
     return NextResponse.json({ 
       success: true, 
